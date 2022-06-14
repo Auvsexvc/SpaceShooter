@@ -8,6 +8,7 @@ namespace SpaceShooter
         private const int NanoInitLimit = 150;
         private const int EnemyInitSpeed = 6;
         private const int NanoInitSpeed = 6;
+        private const int playerSpeed = 14;
         private int enemyLimit;
         private int nanoLimit;
         private int enemySpeed;
@@ -15,7 +16,6 @@ namespace SpaceShooter
         private int enemyCounter;
         private int nanoCounter;
         private int level = 1;
-        private const int playerSpeed = 14;
         private bool levelRised;
 
         public int EnemyCounter { get => enemyCounter; }
