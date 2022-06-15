@@ -96,7 +96,7 @@ namespace SpaceShooter
 
         public void SpawnEnemy()
         {
-            Enemy newEnemy = new(rnd.Next(EnemyInitSpeed, enemySpeed + 1 + (int)Math.Ceiling((double)level / enemySpeed)));
+            Enemy newEnemy = new(rnd.Next(EnemyInitSpeed, enemySpeed + 1 + (int)Math.Ceiling((double)level / enemySpeed)), rnd.Next(1, 7) <= 3);
             Ufos!.Add(newEnemy);
             TriggerSpawnEnemyModel?.Invoke(newEnemy);
         }

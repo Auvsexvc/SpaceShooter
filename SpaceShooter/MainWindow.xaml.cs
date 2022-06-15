@@ -269,7 +269,16 @@ namespace SpaceShooter
         {
             foreach (Rectangle enemy in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy"))
             {
-                Canvas.SetTop(enemy, Canvas.GetTop(enemy) + gameState.Ufos.Where(u => u.Guid.ToString() == enemy.Uid).Select(u => u.Speed).FirstOrDefault());
+                var enemyObj = gameState.Ufos.Find(u => u.Guid.ToString() == enemy.Uid);
+                Canvas.SetTop(enemy, Canvas.GetTop(enemy) + enemyObj!.Speed);
+
+                if (Canvas.GetTop(enemy) > Canvas.GetTop(Player) - 100 && Canvas.GetTop(enemy) < Canvas.GetTop(Player) && enemyObj.Homing)
+                {
+                    if (Canvas.GetLeft(enemy) < Canvas.GetLeft(Player))
+                        Canvas.SetLeft(enemy, Canvas.GetLeft(enemy) + enemyObj!.Speed);
+                    else if (Canvas.GetLeft(enemy) > Canvas.GetLeft(Player))
+                        Canvas.SetLeft(enemy, Canvas.GetLeft(enemy) - enemyObj!.Speed);
+                }
             }
         }
 
