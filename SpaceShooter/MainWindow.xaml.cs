@@ -371,11 +371,7 @@ namespace SpaceShooter
         {
             foreach (Rectangle item in garbageCollector)
             {
-                var x = gameState.Ufos.Find(e => e.Guid.ToString() == item.Uid);
-                if (x != null)
-                {
-                    gameState.Ufos.Remove(x);
-                }
+                gameState.RemoveUfoByUid(item.Uid);
                 GameCanvas.Children.Remove(item);
             }
         }

@@ -82,12 +82,16 @@ namespace SpaceShooter
 
             if (nanoCounter < 0)
             {
-                Nano newNano = new(rnd.Next(NanoInitSpeed, nanoSpeed + 1 + (int)Math.Ceiling((double)level / NanoInitSpeed)));
-                Ufos!.Add(newNano);
-                TriggerSpawnNanoModel?.Invoke(newNano);
-
+                SpawnNano();
                 nanoCounter = nanoLimit;
             }
+        }
+
+        public void SpawnNano()
+        {
+            Nano newNano = new(rnd.Next(NanoInitSpeed, nanoSpeed + 1 + (int)Math.Ceiling((double)level / NanoInitSpeed)));
+            Ufos!.Add(newNano);
+            TriggerSpawnNanoModel?.Invoke(newNano);
         }
 
         public void SpawnEnemy()
@@ -122,6 +126,9 @@ namespace SpaceShooter
             }
         }
 
+        public void RemoveUfoByUid(string uid) =>
+            Ufos.Remove(Ufos.Find(e => e.Guid.ToString() == uid)!);
+
         public void Reset()
         {
             Score = 0;
@@ -131,6 +138,7 @@ namespace SpaceShooter
             enemyLimit = EnemyInitLimit;
             nanoSpeed = NanoInitSpeed;
             nanoLimit = NanoInitLimit;
+            Ufos.Clear();
             GameRestarted?.Invoke();
         }
     }
