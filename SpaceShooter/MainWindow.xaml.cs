@@ -52,10 +52,9 @@ namespace SpaceShooter
         {
             InitializeComponent();
 
-            timer.Interval = TimeSpan.FromMilliseconds(20);
-            timer.Tick += GameLoop;
+            InitializeGameTimer();
 
-            SetupGame();
+            SetUpGame();
 
             gameState.EnemiesCounted += OnEnemiesCounted;
             gameState.NanosCounted += OnNanosCounted;
@@ -63,64 +62,93 @@ namespace SpaceShooter
             gameState.GameRestarted += OnGameRestarted;
         }
 
+        private void InitializeGameTimer()
+        {
+            timer.Interval = TimeSpan.FromMilliseconds(20);
+            timer.Tick += GameLoop;
+        }
+
         private void GameLoop(object? sender, EventArgs e)
         {
-            ScrollStarField();
+            DrawStarField();
 
-            gameState.CountEnemies();
+            gameState.CountDownToEnemySpawn();
 
-            gameState.CountNanos();
+            gameState.CountDownToNanoSpawn();
 
             MovePlayer();
 
-            UpdateData();
+            UpdatePlayerModel();
 
-            SetPlayerHitBox();
+            MoveBullets();
+
+            MoveEnemies();
+
+            MoveNanos();
 
             _ = GetBulletCollision();
 
             GetPlayerCollision();
 
+            UpdateDamage();
+
+            UpdateScore();
+
             CleanUpGarbageCollector();
 
             gameState.MakeGameHarder();
 
-            gameState.IsPlayerDestroyed();
+            gameState.PlayerDestroyed();
         }
 
-        private void SetupGame()
+        private void SetUpGame()
         {
-            var x = GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet" || (string)rect.Tag == "enemy" || (string)rect.Tag == "nano").ToList();
-            foreach (var item in x)
+            ClearGameCanvas();
+            SetUpSprites();
+            SetUpStarfield();
+            SetUpPlayerShip();
+            UpdateDamage();
+
+            CleanUpGarbageCollector();
+
+            GameCanvas.Focus();
+            timer.Start();
+        }
+
+        private void ClearGameCanvas()
+        {
+            foreach (Rectangle item in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet" || (string)rect.Tag == "Enemy" || (string)rect.Tag == "Nano"))
             {
                 GameCanvas.Children.Remove(item);
             }
+        }
 
-            GameCanvas.Focus();
-
+        private void SetUpSprites()
+        {
             background.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/StarField.jpg"));
             playerImage.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/player.png"));
             boomSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/boom.png"));
             shieldSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/playerShield.png"));
             nanoSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/NanoBots.png"));
             boardSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/boardItem.png"));
+        }
 
+        private void SetUpStarfield()
+        {
             background1.Fill = background;
             background2.Fill = background;
+            Canvas.SetBottom(background1, 0);
+            Canvas.SetBottom(background2, 707);
+        }
 
+        private void SetUpPlayerShip()
+        {
             Player.Fill = playerImage;
             Canvas.SetLeft(Player, 246);
             Canvas.SetTop(Player, 518);
-            UpdateData();
-
-            Canvas.SetBottom(background1, 0);
-            Canvas.SetBottom(background2, 707);
-
-            CleanUpGarbageCollector();
-            timer.Start();
         }
 
-        private void ScrollStarField()
+        private void DrawStarField()
         {
             Canvas.SetBottom(background1, Canvas.GetBottom(background1) - 5);
             Canvas.SetBottom(background2, Canvas.GetBottom(background2) - 5);
@@ -135,7 +163,7 @@ namespace SpaceShooter
             }
         }
 
-        private void MakeEnemies()
+        private void SpawnEnemy()
         {
             Rectangle newEnemy = new()
             {
@@ -153,7 +181,7 @@ namespace SpaceShooter
             GameCanvas.Children.Add(newEnemy);
         }
 
-        private void MakeNanos()
+        private void SpawnNano()
         {
             Rectangle newNano = new()
             {
@@ -167,7 +195,7 @@ namespace SpaceShooter
             GameCanvas.Children.Add(newNano);
         }
 
-        private void MakeBullet()
+        private void SpawnBullet()
         {
             Rectangle newBullet = new()
             {
@@ -182,7 +210,7 @@ namespace SpaceShooter
             GameCanvas.Children.Add(newBullet);
         }
 
-        private void SetPlayerHitBox()
+        private void UpdatePlayerModel()
         {
             playerHitBox = new Rect(Canvas.GetLeft(Player), Canvas.GetTop(Player), Player.Width, Player.Height);
             Player.Fill = playerImage;
@@ -208,9 +236,8 @@ namespace SpaceShooter
             }
         }
 
-        private void UpdateData()
+        private void UpdateDamage()
         {
-            ScoreText.Content = $"Score: {gameState.Score}";
             Damage.Content = $"Damage: {gameState.Damage}";
 
             if (gameState.Damage > 50)
@@ -223,50 +250,69 @@ namespace SpaceShooter
             }
         }
 
+        private void UpdateScore()
+        {
+            ScoreText.Content = $"Score: {gameState.Score}";
+        }
+
+        private void MoveBullets()
+        {
+            foreach (Rectangle bullet in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet"))
+            {
+                Canvas.SetTop(bullet, Canvas.GetTop(bullet) - gameState.BulletSpeed);
+            }
+        }
+
+        private void MoveEnemies()
+        {
+            foreach (Rectangle enemy in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy"))
+            {
+                Canvas.SetTop(enemy, Canvas.GetTop(enemy) + gameState.EnemySpeed);
+            }
+        }
+
+        private void MoveNanos()
+        {
+            foreach (Rectangle nano in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Nano"))
+            {
+                Canvas.SetTop(nano, Canvas.GetTop(nano) + gameState.NanoSpeed);
+            }
+        }
+
         private async Task GetBulletCollision()
         {
-            foreach (Rectangle bullet in GameCanvas.Children.OfType<Rectangle>())
+            foreach (Rectangle bullet in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet"))
             {
-                if ((string)bullet.Tag == "Bullet")
+                Rect bulletHitBox = new(Canvas.GetLeft(bullet), Canvas.GetTop(bullet), bullet.Width, bullet.Height);
+
+                if (Canvas.GetTop(bullet) < 60)
                 {
-                    Canvas.SetTop(bullet, Canvas.GetTop(bullet) - 20);
-                    Rect bulletHitBox = new(Canvas.GetLeft(bullet), Canvas.GetTop(bullet), bullet.Width, bullet.Height);
+                    garbageCollector.Add(bullet);
+                }
 
-                    if (Canvas.GetTop(bullet) < 60)
+                foreach (Rectangle nano in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Nano"))
+                {
+                    Rect nanoHit = new(Canvas.GetLeft(nano), Canvas.GetTop(nano), nano.Width, nano.Height);
+
+                    if (bulletHitBox.IntersectsWith(nanoHit))
                     {
+                        nano.Fill = boomSprite;
                         garbageCollector.Add(bullet);
+                        await Task.Delay(100);
+                        garbageCollector.Add(nano);
                     }
+                }
+                foreach (Rectangle enemy in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy"))
+                {
+                    Rect enemyHit = new(Canvas.GetLeft(enemy), Canvas.GetTop(enemy), enemy.Width, enemy.Height);
 
-                    foreach (Rectangle nano in GameCanvas.Children.OfType<Rectangle>())
+                    if (bulletHitBox.IntersectsWith(enemyHit))
                     {
-                        if ((string)nano.Tag == "Nano")
-                        {
-                            Rect nanoHit = new(Canvas.GetLeft(nano), Canvas.GetTop(nano), nano.Width, nano.Height);
-
-                            if (bulletHitBox.IntersectsWith(nanoHit))
-                            {
-                                nano.Fill = boomSprite;
-                                garbageCollector.Add(bullet);
-                                await Task.Delay(100);
-                                garbageCollector.Add(nano);
-                            }
-                        }
-                    }
-                    foreach (Rectangle enemy in GameCanvas.Children.OfType<Rectangle>())
-                    {
-                        if ((string)enemy.Tag == "Enemy")
-                        {
-                            Rect enemyHit = new(Canvas.GetLeft(enemy), Canvas.GetTop(enemy), enemy.Width, enemy.Height);
-
-                            if (bulletHitBox.IntersectsWith(enemyHit))
-                            {
-                                enemy.Fill = boomSprite;
-                                garbageCollector.Add(bullet);
-                                gameState.Score++;
-                                await Task.Delay(100);
-                                garbageCollector.Add(enemy);
-                            }
-                        }
+                        enemy.Fill = boomSprite;
+                        garbageCollector.Add(bullet);
+                        gameState.Score++;
+                        await Task.Delay(100);
+                        garbageCollector.Add(enemy);
                     }
                 }
             }
@@ -278,8 +324,6 @@ namespace SpaceShooter
             {
                 if ((string)item.Tag == "Enemy")
                 {
-                    Canvas.SetTop(item, Canvas.GetTop(item) + gameState.EnemySpeed);
-
                     Rect enemyHitBox = new(Canvas.GetLeft(item), Canvas.GetTop(item), item.Width, item.Height);
 
                     if (Canvas.GetTop(item) > 650)
@@ -297,8 +341,6 @@ namespace SpaceShooter
 
                 if ((string)item.Tag == "Nano")
                 {
-                    Canvas.SetTop(item, Canvas.GetTop(item) + gameState.NanoSpeed);
-
                     Rect nanoHitBox = new(Canvas.GetLeft(item), Canvas.GetTop(item), item.Width, item.Height);
 
                     if (Canvas.GetTop(item) > 650)
@@ -333,17 +375,17 @@ namespace SpaceShooter
         private async void OnGameRestarted()
         {
             await TransitionToGameScreen();
-            SetupGame();
+            SetUpGame();
         }
 
         private void OnEnemiesCounted()
         {
-            MakeEnemies();
+            SpawnEnemy();
         }
 
         private void OnNanosCounted()
         {
-            MakeNanos();
+            SpawnNano();
         }
 
         private async void OnGameEnded()
@@ -380,7 +422,7 @@ namespace SpaceShooter
                     break;
 
                 case Key.Space:
-                    MakeBullet();
+                    SpawnBullet();
                     break;
             }
         }

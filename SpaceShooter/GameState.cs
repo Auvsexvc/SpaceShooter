@@ -8,14 +8,15 @@ namespace SpaceShooter
         private const int NanoInitLimit = 150;
         private const int EnemyInitSpeed = 6;
         private const int NanoInitSpeed = 6;
-        private const int playerSpeed = 14;
+        private const int PlayerInitSpeed = 14;
+        private const int BulletInitSpeed = 20;
         private int enemyLimit;
         private int nanoLimit;
         private int enemySpeed;
         private int nanoSpeed;
         private int enemyCounter;
         private int nanoCounter;
-        private int level = 1;
+        private int level;
         private bool levelRised;
 
         public int EnemyCounter { get => enemyCounter; }
@@ -24,7 +25,8 @@ namespace SpaceShooter
         public int Score { get; set; }
         public int Damage { get; set; }
         public int Level { get => level; }
-        public static int PlayerSpeed { get => playerSpeed; }
+        public static int PlayerSpeed { get => PlayerInitSpeed; }
+        public int BulletSpeed { get => BulletInitSpeed; }
         public int EnemyLimit { get => enemyLimit; }
 
         public event Action? EnemiesCounted;
@@ -37,7 +39,6 @@ namespace SpaceShooter
 
         public GameState()
         {
-            //GameControls = new GameControls();
             Score = 0;
             Damage = 0;
             level = 0;
@@ -49,7 +50,7 @@ namespace SpaceShooter
             nanoCounter = NanoInitLimit;
         }
 
-        public void IsPlayerDestroyed()
+        public void PlayerDestroyed()
         {
             if (Damage > 99)
             {
@@ -58,7 +59,7 @@ namespace SpaceShooter
             }
         }
 
-        public void CountEnemies()
+        public void CountDownToEnemySpawn()
         {
             enemyCounter--;
 
@@ -69,7 +70,7 @@ namespace SpaceShooter
             }
         }
 
-        public void CountNanos()
+        public void CountDownToNanoSpawn()
         {
             nanoCounter--;
 
@@ -94,7 +95,11 @@ namespace SpaceShooter
                 }
                 else
                 {
-                    enemyLimit = Math.Abs(EnemyInitLimit - ((int)Math.Ceiling((double)Level / ((double)EnemyInitLimit / 10)) * 10) - (Level % 5));
+                    enemyLimit = EnemyInitLimit - ((int)Math.Ceiling((double)Level / ((double)EnemyInitLimit / 10)) * 10) - (int)Math.Ceiling((EnemyInitLimit - Level) / 10.0);
+                    if (enemyLimit < 2)
+                    {
+                        enemyLimit = 1;
+                    }
                 }
                 level++;
                 levelRised = true;
