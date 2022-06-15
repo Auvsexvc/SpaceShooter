@@ -9,5 +9,6 @@ namespace SpaceShooter
         public bool Tracking { get; set; }
         public bool Shooting { get; set; }
         public bool Evasion { get; set; }
+        public bool TakesEvasiveManeuver { get; set; }
     }
 }

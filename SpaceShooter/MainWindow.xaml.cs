@@ -83,15 +83,15 @@ namespace SpaceShooter
 
             UpdatePlayerModel();
 
-            MoveBullets();
+            _ = GetBulletCollision();
 
-            MoveEnemyBullets();
+            MoveBullets();
 
             MoveEnemies();
 
-            MoveNanos();
+            MoveEnemyBullets();
 
-            _ = GetBulletCollision();
+            MoveNanos();
 
             GetPlayerCollision();
 
@@ -313,6 +313,7 @@ namespace SpaceShooter
         private void EnemyEvades(Rectangle uRect, Rectangle bullet)
         {
             var uObj = gameState.Ufos.Find(u => u.Guid.ToString() == uRect.Uid);
+            uObj!.TakesEvasiveManeuver = false;
 
             if (Canvas.GetTop(uRect) > Canvas.GetTop(bullet) - 450)
             {
@@ -320,13 +321,19 @@ namespace SpaceShooter
                 {
                     if (uObj!.Evasion)
                     {
-                        if(Canvas.GetLeft(uRect) - uObj!.Speed > SpawnMinCanvasWidth)
+                        if (Canvas.GetLeft(uRect) - uObj!.Speed > SpawnMinCanvasWidth)
+                        {
+                            uObj.TakesEvasiveManeuver = true;
                             Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) - uObj!.Speed);
+                        }
                     }
                     else
                     {
                         if (Canvas.GetLeft(uRect) - uObj!.Speed < SpawnMaxCanvasWidth)
+                        {
+                            uObj.TakesEvasiveManeuver = true;
                             Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + uObj!.Speed);
+                        }
                     }
                 }
             }
@@ -334,7 +341,7 @@ namespace SpaceShooter
 
         private void UfoIsTrackingPlayer(UnindentifiedFlyingObject uObj, Rectangle uRect)
         {
-            if (Canvas.GetTop(uRect) > Canvas.GetTop(Player) - 150 && Canvas.GetTop(uRect) < Canvas.GetTop(Player) && uObj.Tracking && !uObj.Shooting)
+            if (Canvas.GetTop(uRect) > Canvas.GetTop(Player) - 150 && Canvas.GetTop(uRect) < Canvas.GetTop(Player) && uObj.Tracking && !uObj.Shooting && !uObj.TakesEvasiveManeuver)
             {
                 if (Canvas.GetLeft(uRect) < Canvas.GetLeft(Player))
                 {
@@ -356,7 +363,7 @@ namespace SpaceShooter
 
         private void UfoIsAShooter(UnindentifiedFlyingObject uObj, Rectangle uRect)
         {
-            if (Canvas.GetTop(uRect) > Canvas.GetTop(Player) - GameCanvas.Height && Canvas.GetTop(uRect) < Canvas.GetTop(Player) && uObj.Shooting)
+            if (Canvas.GetTop(uRect) > Canvas.GetTop(Player) - GameCanvas.Height && Canvas.GetTop(uRect) < Canvas.GetTop(Player) && uObj.Shooting && !uObj.TakesEvasiveManeuver)
             {
                 if (Canvas.GetLeft(uRect) < Canvas.GetLeft(Player))
                 {
