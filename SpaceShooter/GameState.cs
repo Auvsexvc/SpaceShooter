@@ -11,6 +11,7 @@ namespace SpaceShooter
         private const int NanoInitSpeed = 6;
         private const int PlayerInitSpeed = 14;
         private const int BulletInitSpeed = 20;
+        private const int EnemyBulletInitSpeed = 15;
         private readonly Random rnd = new();
 
         private int enemyLimit;
@@ -31,6 +32,8 @@ namespace SpaceShooter
         public int Level { get => level; }
         public static int PlayerSpeed { get => PlayerInitSpeed; }
         public static int BulletSpeed { get => BulletInitSpeed; }
+        public static int EnemyBulletSpeed { get => EnemyBulletInitSpeed; }
+
         public int EnemyLimit { get => enemyLimit; }
 
         public event Action<Enemy>? TriggerSpawnEnemyModel;
@@ -96,7 +99,7 @@ namespace SpaceShooter
 
         public void SpawnEnemy()
         {
-            Enemy newEnemy = new(rnd.Next(EnemyInitSpeed, enemySpeed + 1 + (int)Math.Ceiling((double)level / enemySpeed)), rnd.Next(1, 7) <= 3);
+            Enemy newEnemy = new(rnd.Next(EnemyInitSpeed, enemySpeed + 1 + (int)Math.Ceiling((double)level / enemySpeed)), rnd.Next(1, 7) <= 3, rnd.Next(1, 7) <= 3, rnd.Next(1, 7) <= 3);
             Ufos!.Add(newEnemy);
             TriggerSpawnEnemyModel?.Invoke(newEnemy);
         }

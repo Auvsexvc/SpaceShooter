@@ -4,11 +4,13 @@ namespace SpaceShooter
 {
     internal class Enemy : UnindentifiedFlyingObject
     {
-        public Enemy(int speed, bool homing = false)
+        public Enemy(int speed, bool homing = false, bool shooting = false, bool evasion = false)
         {
             Speed = speed;
             Guid = Guid.NewGuid();
-            Homing = homing;
+            Tracking = homing;
+            Shooting = shooting;
+            Evasion = evasion;
         }
     }
 }

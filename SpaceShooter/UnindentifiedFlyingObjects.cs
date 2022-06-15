@@ -6,6 +6,8 @@ namespace SpaceShooter
     {
         public Guid Guid { get; set; }
         public int Speed { get; set; }
-        public bool Homing { get; set; }
+        public bool Tracking { get; set; }
+        public bool Shooting { get; set; }
+        public bool Evasion { get; set; }
     }
 }

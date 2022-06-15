@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -30,6 +31,7 @@ namespace SpaceShooter
 
         private readonly List<Rectangle> garbageCollector = new();
         private readonly Random rnd = new();
+        private readonly Stopwatch stw = new();
 
         private Rect playerHitBox;
 
@@ -79,11 +81,13 @@ namespace SpaceShooter
 
             UpdatePlayerModel();
 
-            DrawBullets();
+            MoveBullets();
 
-            DrawEnemies();
+            MoveEnemyBullets();
 
-            DrawNanos();
+            MoveEnemies();
+
+            MoveNanos();
 
             _ = GetBulletCollision();
 
@@ -212,6 +216,22 @@ namespace SpaceShooter
             GameCanvas.Children.Add(newBullet);
         }
 
+        private void SpawnEnemyBullet(UnindentifiedFlyingObject enemyObj)
+        {
+            Rectangle enemy = GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy").First(r => r.Uid == enemyObj.Guid.ToString());
+            Rectangle newEnemyBullet = new()
+            {
+                Tag = "EnemyBullet",
+                Height = 20,
+                Width = 5,
+                Fill = Brushes.White,
+                Stroke = Brushes.Green,
+            };
+            Canvas.SetLeft(newEnemyBullet, Canvas.GetLeft(enemy) + (enemy.Width / 2));
+            Canvas.SetTop(newEnemyBullet, Canvas.GetTop(enemy) + enemy.Height);
+            GameCanvas.Children.Add(newEnemyBullet);
+        }
+
         private void UpdatePlayerModel()
         {
             playerHitBox = new Rect(Canvas.GetLeft(Player), Canvas.GetTop(Player), Player.Width, Player.Height);
@@ -257,7 +277,7 @@ namespace SpaceShooter
             ScoreText.Content = $"Score: {gameState.Score}";
         }
 
-        private void DrawBullets()
+        private void MoveBullets()
         {
             foreach (Rectangle bullet in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet"))
             {
@@ -265,24 +285,99 @@ namespace SpaceShooter
             }
         }
 
-        private void DrawEnemies()
+        private void MoveEnemyBullets()
         {
-            foreach (Rectangle enemy in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy"))
+            foreach (Rectangle bullet in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "EnemyBullet"))
             {
-                var enemyObj = gameState.Ufos.Find(u => u.Guid.ToString() == enemy.Uid);
-                Canvas.SetTop(enemy, Canvas.GetTop(enemy) + enemyObj!.Speed);
+                Canvas.SetTop(bullet, Canvas.GetTop(bullet) + GameState.EnemyBulletSpeed);
+            }
+        }
 
-                if (Canvas.GetTop(enemy) > Canvas.GetTop(Player) - 100 && Canvas.GetTop(enemy) < Canvas.GetTop(Player) && enemyObj.Homing)
+        private void MoveEnemies()
+        {
+            //foreach (Rectangle enemy in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy"))
+            foreach (UnindentifiedFlyingObject enemyObj in gameState.Ufos)
+            {
+                var enemyRect = GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy").FirstOrDefault(rect => enemyObj.Guid.ToString() == rect.Uid);
+                if (enemyRect is not null)
                 {
-                    if (Canvas.GetLeft(enemy) < Canvas.GetLeft(Player))
-                        Canvas.SetLeft(enemy, Canvas.GetLeft(enemy) + enemyObj!.Speed);
-                    else if (Canvas.GetLeft(enemy) > Canvas.GetLeft(Player))
-                        Canvas.SetLeft(enemy, Canvas.GetLeft(enemy) - enemyObj!.Speed);
+                    Canvas.SetTop(enemyRect, Canvas.GetTop(enemyRect) + enemyObj!.Speed);
+                    UfoIsTrackingPlayer(enemyObj, enemyRect);
+                    UfoIsAShooter(enemyObj, enemyRect);
                 }
             }
         }
 
-        private void DrawNanos()
+        private void EnemyEvades(Rectangle uRect, Rectangle bullet)
+        {
+            var uObj = gameState.Ufos.Find(u => u.Guid.ToString() == uRect.Uid);
+
+            if (Canvas.GetTop(uRect) > Canvas.GetTop(bullet) - 450)
+            {
+                if (Canvas.GetLeft(uRect) - 40 <= Canvas.GetLeft(bullet) && Canvas.GetLeft(uRect) + uRect.Width + 40 >= Canvas.GetLeft(bullet) + bullet.Width)
+                {
+                    if (uObj!.Evasion)
+                    {
+                        Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) - uObj!.Speed);
+                    }
+                    else
+                    {
+                        Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + uObj!.Speed);
+
+                    }
+                }
+            }
+        }
+
+        private void UfoIsTrackingPlayer(UnindentifiedFlyingObject uObj, Rectangle uRect)
+        {
+            if (Canvas.GetTop(uRect) > Canvas.GetTop(Player) - 150 && Canvas.GetTop(uRect) < Canvas.GetTop(Player) && uObj.Tracking && !uObj.Shooting)
+            {
+                if (Canvas.GetLeft(uRect) < Canvas.GetLeft(Player))
+                {
+                    Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + uObj!.Speed);
+                }
+                else if (Canvas.GetLeft(uRect) > Canvas.GetLeft(Player) + (Player.Width / 4))
+                {
+                    Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) - uObj!.Speed);
+                }
+                else
+                {
+                    if (uObj.Shooting)
+                    {
+                        EnemyShoots(uObj);
+                    }
+                }
+            }
+        }
+
+        private void UfoIsAShooter(UnindentifiedFlyingObject uObj, Rectangle uRect)
+        {
+            if (Canvas.GetTop(uRect) > Canvas.GetTop(Player) - GameCanvas.Height && Canvas.GetTop(uRect) < Canvas.GetTop(Player) && uObj.Shooting)
+            {
+                if (Canvas.GetLeft(uRect) < Canvas.GetLeft(Player))
+                {
+                    Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + uObj!.Speed);
+                }
+                else if (Canvas.GetLeft(uRect) > Canvas.GetLeft(Player) + (Player.Width / 4))
+                {
+                    Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) - uObj!.Speed);
+                }
+                else
+                {
+                    EnemyShoots(uObj);
+                }
+            }
+        }
+
+        private void EnemyShoots(UnindentifiedFlyingObject uObj)
+        {
+            stw.Start();
+            if (stw.ElapsedMilliseconds % timer.Interval.TotalMilliseconds == 0)
+                SpawnEnemyBullet(uObj);
+        }
+
+        private void MoveNanos()
         {
             foreach (Rectangle nano in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Nano"))
             {
@@ -318,6 +413,8 @@ namespace SpaceShooter
                 {
                     Rect enemyHit = new(Canvas.GetLeft(enemy), Canvas.GetTop(enemy), enemy.Width, enemy.Height);
 
+                    EnemyEvades(enemy, bullet);
+
                     if (bulletHitBox.IntersectsWith(enemyHit))
                     {
                         enemy.Fill = boomSprite;
@@ -348,6 +445,23 @@ namespace SpaceShooter
                     {
                         Player.Fill = shieldSprite;
                         gameState.Damage++;
+                    }
+                }
+
+                if ((string)item.Tag == "EnemyBullet")
+                {
+                    Rect enemyHitBox = new(Canvas.GetLeft(item), Canvas.GetTop(item), item.Width, item.Height);
+
+                    if (Canvas.GetTop(item) > 650)
+                    {
+                        garbageCollector.Add(item);
+                    }
+
+                    if (playerHitBox.IntersectsWith(enemyHitBox))
+                    {
+                        Player.Fill = shieldSprite;
+                        gameState.Damage += 10;
+                        garbageCollector.Add(item);
                     }
                 }
 
