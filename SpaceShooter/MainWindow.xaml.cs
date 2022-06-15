@@ -32,6 +32,8 @@ namespace SpaceShooter
         private readonly List<Rectangle> garbageCollector = new();
         private readonly Random rnd = new();
         private readonly Stopwatch stw = new();
+        private const int SpawnMinCanvasWidth = 30;
+        private const int SpawnMaxCanvasWidth = 430;
 
         private Rect playerHitBox;
 
@@ -318,12 +320,13 @@ namespace SpaceShooter
                 {
                     if (uObj!.Evasion)
                     {
-                        Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) - uObj!.Speed);
+                        if(Canvas.GetLeft(uRect) - uObj!.Speed > SpawnMinCanvasWidth)
+                            Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) - uObj!.Speed);
                     }
                     else
                     {
-                        Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + uObj!.Speed);
-
+                        if (Canvas.GetLeft(uRect) - uObj!.Speed < SpawnMaxCanvasWidth)
+                            Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + uObj!.Speed);
                     }
                 }
             }
