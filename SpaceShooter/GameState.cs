@@ -13,8 +13,6 @@ namespace SpaceShooter
         private const int BulletInitSpeed = 20;
         private readonly Random rnd = new();
 
-        private Enemy? newEnemy;
-
         private int enemyLimit;
         private int nanoLimit;
         private int enemySpeed;
@@ -24,7 +22,7 @@ namespace SpaceShooter
         private int level;
         private bool levelRised;
 
-        public List<Enemy> Enemies { get; } = new();
+        public List<UnindentifiedFlyingObject> Ufos { get; } = new();
         public int EnemyCounter { get => enemyCounter; }
         public int EnemySpeed { get => enemySpeed; }
         public int NanoSpeed { get => nanoSpeed; }
@@ -35,9 +33,9 @@ namespace SpaceShooter
         public static int BulletSpeed { get => BulletInitSpeed; }
         public int EnemyLimit { get => enemyLimit; }
 
-        public event Action<Enemy>? TriggerEnemySpawn;
+        public event Action<Enemy>? TriggerSpawnEnemyModel;
 
-        public event Action? TriggerNanoSpawn;
+        public event Action<Nano>? TriggerSpawnNanoModel;
 
         public event Action? GameEnded;
 
@@ -73,9 +71,7 @@ namespace SpaceShooter
 
             if (enemyCounter < 0)
             {
-                newEnemy = new(rnd.Next(EnemyInitSpeed, enemySpeed + 1 + (int)Math.Ceiling((double)level / enemySpeed)));
-                Enemies!.Add(newEnemy);
-                TriggerEnemySpawn?.Invoke(newEnemy);
+                SpawnEnemy();
                 enemyCounter = enemyLimit;
             }
         }
@@ -86,10 +82,19 @@ namespace SpaceShooter
 
             if (nanoCounter < 0)
             {
-                TriggerNanoSpawn?.Invoke();
+                Nano newNano = new(rnd.Next(NanoInitSpeed, nanoSpeed + 1 + (int)Math.Ceiling((double)level / NanoInitSpeed)));
+                Ufos!.Add(newNano);
+                TriggerSpawnNanoModel?.Invoke(newNano);
 
                 nanoCounter = nanoLimit;
             }
+        }
+
+        public void SpawnEnemy()
+        {
+            Enemy newEnemy = new(rnd.Next(EnemyInitSpeed, enemySpeed + 1 + (int)Math.Ceiling((double)level / enemySpeed)));
+            Ufos!.Add(newEnemy);
+            TriggerSpawnEnemyModel?.Invoke(newEnemy);
         }
 
         public void MakeGameHarder()

@@ -2,9 +2,9 @@
 
 namespace SpaceShooter
 {
-    internal class Enemy : UnindentifiedFlyingObject
+    internal class Nano : UnindentifiedFlyingObject
     {
-        public Enemy(int speed)
+        public Nano(int speed)
         {
             Speed = speed;
             Guid = Guid.NewGuid();

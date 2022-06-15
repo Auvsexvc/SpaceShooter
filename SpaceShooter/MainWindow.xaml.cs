@@ -55,8 +55,8 @@ namespace SpaceShooter
 
             SetUpGame();
 
-            gameState.TriggerEnemySpawn += OnTriggerEnemySpawn;
-            gameState.TriggerNanoSpawn += OnTriggerNanoSpawn;
+            gameState.TriggerSpawnEnemyModel += OnEnemySpawn;
+            gameState.TriggerSpawnNanoModel += OnNanoSpawn;
             gameState.GameEnded += OnGameEnded;
             gameState.GameRestarted += OnGameRestarted;
         }
@@ -164,12 +164,12 @@ namespace SpaceShooter
             }
         }
 
-        private void SpawnEnemy(Enemy enemyObj)
+        private void SpawnEnemyModel(Enemy enemy)
         {
             Rectangle newEnemy = new()
             {
                 Tag = "Enemy",
-                Uid = enemyObj.Guid.ToString(),
+                Uid = enemy.Guid.ToString(),
                 Height = 50,
                 Width = 56,
                 Fill = new ImageBrush()
@@ -182,11 +182,12 @@ namespace SpaceShooter
             GameCanvas.Children.Add(newEnemy);
         }
 
-        private void SpawnNano()
+        private void SpawnNanoModel(Nano nano)
         {
             Rectangle newNano = new()
             {
                 Tag = "Nano",
+                Uid = nano.Guid.ToString(),
                 Height = 50,
                 Width = 56,
                 Fill = nanoSprite
@@ -268,7 +269,7 @@ namespace SpaceShooter
         {
             foreach (Rectangle enemy in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy"))
             {
-                Canvas.SetTop(enemy, Canvas.GetTop(enemy) + gameState.Enemies.Where(e => e.Guid.ToString() == enemy.Uid).Select(e => e.Speed).First());
+                Canvas.SetTop(enemy, Canvas.GetTop(enemy) + gameState.Ufos.Where(u => u.Guid.ToString() == enemy.Uid).Select(u => u.Speed).FirstOrDefault());
             }
         }
 
@@ -276,7 +277,7 @@ namespace SpaceShooter
         {
             foreach (Rectangle nano in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Nano"))
             {
-                Canvas.SetTop(nano, Canvas.GetTop(nano) + gameState.NanoSpeed);
+                Canvas.SetTop(nano, Canvas.GetTop(nano) + gameState.Ufos.Where(u => u.Guid.ToString() == nano.Uid).Select(u => u.Speed).FirstOrDefault());
             }
         }
 
@@ -301,6 +302,7 @@ namespace SpaceShooter
                         garbageCollector.Add(bullet);
                         await Task.Delay(100);
                         garbageCollector.Add(nano);
+                        gameState.SpawnEnemy();
                     }
                 }
                 foreach (Rectangle enemy in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy"))
@@ -369,6 +371,11 @@ namespace SpaceShooter
         {
             foreach (Rectangle item in garbageCollector)
             {
+                var x = gameState.Ufos.Find(e => e.Guid.ToString() == item.Uid);
+                if (x != null)
+                {
+                    gameState.Ufos.Remove(x);
+                }
                 GameCanvas.Children.Remove(item);
             }
         }
@@ -379,14 +386,14 @@ namespace SpaceShooter
             SetUpGame();
         }
 
-        private void OnTriggerEnemySpawn(Enemy newEnemy)
+        private void OnEnemySpawn(Enemy newEnemy)
         {
-            SpawnEnemy(newEnemy);
+            SpawnEnemyModel(newEnemy);
         }
 
-        private void OnTriggerNanoSpawn()
+        private void OnNanoSpawn(Nano newNano)
         {
-            SpawnNano();
+            SpawnNanoModel(newNano);
         }
 
         private async void OnGameEnded()
