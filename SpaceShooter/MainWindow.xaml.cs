@@ -79,11 +79,11 @@ namespace SpaceShooter
 
             UpdatePlayerModel();
 
-            MoveBullets();
+            DrawBullets();
 
-            MoveEnemies();
+            DrawEnemies();
 
-            MoveNanos();
+            DrawNanos();
 
             _ = GetBulletCollision();
 
@@ -164,11 +164,12 @@ namespace SpaceShooter
             }
         }
 
-        private void SpawnEnemy()
+        private void SpawnEnemy(Enemy enemyObj)
         {
             Rectangle newEnemy = new()
             {
                 Tag = "Enemy",
+                Uid = enemyObj.Guid.ToString(),
                 Height = 50,
                 Width = 56,
                 Fill = new ImageBrush()
@@ -176,7 +177,6 @@ namespace SpaceShooter
                     ImageSource = new BitmapImage(new Uri($"pack://application:,,,/Assets/{rnd.Next(1, 10)}.png"))
                 }
             };
-
             Canvas.SetTop(newEnemy, -10);
             Canvas.SetLeft(newEnemy, rnd.Next(30, 430));
             GameCanvas.Children.Add(newEnemy);
@@ -256,7 +256,7 @@ namespace SpaceShooter
             ScoreText.Content = $"Score: {gameState.Score}";
         }
 
-        private void MoveBullets()
+        private void DrawBullets()
         {
             foreach (Rectangle bullet in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet"))
             {
@@ -264,15 +264,15 @@ namespace SpaceShooter
             }
         }
 
-        private void MoveEnemies()
+        private void DrawEnemies()
         {
             foreach (Rectangle enemy in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy"))
             {
-                Canvas.SetTop(enemy, Canvas.GetTop(enemy) + gameState.EnemySpeed);
+                Canvas.SetTop(enemy, Canvas.GetTop(enemy) + gameState.Enemies.Where(e => e.Guid.ToString() == enemy.Uid).Select(e => e.Speed).First());
             }
         }
 
-        private void MoveNanos()
+        private void DrawNanos()
         {
             foreach (Rectangle nano in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Nano"))
             {
@@ -379,9 +379,9 @@ namespace SpaceShooter
             SetUpGame();
         }
 
-        private void OnTriggerEnemySpawn()
+        private void OnTriggerEnemySpawn(Enemy newEnemy)
         {
-            SpawnEnemy();
+            SpawnEnemy(newEnemy);
         }
 
         private void OnTriggerNanoSpawn()

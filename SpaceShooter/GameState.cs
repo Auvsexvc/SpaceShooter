@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SpaceShooter
 {
@@ -10,6 +11,10 @@ namespace SpaceShooter
         private const int NanoInitSpeed = 6;
         private const int PlayerInitSpeed = 14;
         private const int BulletInitSpeed = 20;
+        private readonly Random rnd = new();
+
+        private Enemy? newEnemy;
+
         private int enemyLimit;
         private int nanoLimit;
         private int enemySpeed;
@@ -19,6 +24,7 @@ namespace SpaceShooter
         private int level;
         private bool levelRised;
 
+        public List<Enemy> Enemies { get; } = new();
         public int EnemyCounter { get => enemyCounter; }
         public int EnemySpeed { get => enemySpeed; }
         public int NanoSpeed { get => nanoSpeed; }
@@ -29,7 +35,7 @@ namespace SpaceShooter
         public static int BulletSpeed { get => BulletInitSpeed; }
         public int EnemyLimit { get => enemyLimit; }
 
-        public event Action? TriggerEnemySpawn;
+        public event Action<Enemy>? TriggerEnemySpawn;
 
         public event Action? TriggerNanoSpawn;
 
@@ -57,8 +63,8 @@ namespace SpaceShooter
 
         public void GameOver()
         {
-                Damage = 100;
-                GameEnded?.Invoke();
+            Damage = 100;
+            GameEnded?.Invoke();
         }
 
         public void CountDownToEnemySpawn()
@@ -67,7 +73,9 @@ namespace SpaceShooter
 
             if (enemyCounter < 0)
             {
-                TriggerEnemySpawn?.Invoke();
+                newEnemy = new(rnd.Next(EnemyInitSpeed, enemySpeed + 1 + (int)Math.Ceiling((double)level / enemySpeed)));
+                Enemies!.Add(newEnemy);
+                TriggerEnemySpawn?.Invoke(newEnemy);
                 enemyCounter = enemyLimit;
             }
         }
@@ -79,6 +87,7 @@ namespace SpaceShooter
             if (nanoCounter < 0)
             {
                 TriggerNanoSpawn?.Invoke();
+
                 nanoCounter = nanoLimit;
             }
         }
@@ -98,9 +107,9 @@ namespace SpaceShooter
                 else
                 {
                     enemyLimit = EnemyInitLimit - ((int)Math.Ceiling(Level / (EnemyInitLimit / 10.0)) * 10) - (int)Math.Ceiling((EnemyInitLimit - Level) / 10.0);
-                    if (enemyLimit < 2)
+                    if (enemyLimit < 11)
                     {
-                        enemyLimit = 1;
+                        enemyLimit = 10;
                     }
                 }
                 level++;
