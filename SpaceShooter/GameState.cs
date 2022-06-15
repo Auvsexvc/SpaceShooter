@@ -50,13 +50,15 @@ namespace SpaceShooter
             nanoCounter = NanoInitLimit;
         }
 
-        public void PlayerDestroyed()
+        public bool IsPlayerDestroyed()
         {
-            if (Damage > 99)
-            {
+            return Damage > 99;
+        }
+
+        public void GameOver()
+        {
                 Damage = 100;
                 GameEnded?.Invoke();
-            }
         }
 
         public void CountDownToEnemySpawn()

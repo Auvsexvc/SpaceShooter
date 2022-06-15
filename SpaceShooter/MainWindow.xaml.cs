@@ -97,7 +97,10 @@ namespace SpaceShooter
 
             gameState.MakeGameHarder();
 
-            gameState.PlayerDestroyed();
+            if (gameState.IsPlayerDestroyed())
+            {
+                gameState.GameOver();
+            }
         }
 
         private void SetUpGame()
@@ -116,7 +119,7 @@ namespace SpaceShooter
 
         private void ClearGameCanvas()
         {
-            foreach (Rectangle item in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet" || (string)rect.Tag == "Enemy" || (string)rect.Tag == "Nano"))
+            foreach (Rectangle item in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet" || (string)rect.Tag == "Enemy" || (string)rect.Tag == "Nano").ToList())
             {
                 GameCanvas.Children.Remove(item);
             }
