@@ -26,7 +26,6 @@ namespace SpaceShooter
         private readonly ImageBrush nanoSprite = new();
         private readonly ImageBrush boomSprite = new();
         private readonly ImageBrush shieldSprite = new();
-        private readonly ImageBrush boardSprite = new();
         private readonly DispatcherTimer timer = new();
 
         private readonly List<Rectangle> garbageCollector = new();
@@ -56,8 +55,8 @@ namespace SpaceShooter
 
             SetUpGame();
 
-            gameState.EnemiesCounted += OnEnemiesCounted;
-            gameState.NanosCounted += OnNanosCounted;
+            gameState.TriggerEnemySpawn += OnTriggerEnemySpawn;
+            gameState.TriggerNanoSpawn += OnTriggerNanoSpawn;
             gameState.GameEnded += OnGameEnded;
             gameState.GameRestarted += OnGameRestarted;
         }
@@ -70,7 +69,7 @@ namespace SpaceShooter
 
         private void GameLoop(object? sender, EventArgs e)
         {
-            DrawStarField();
+            DrawParallaxStarField();
 
             gameState.CountDownToEnemySpawn();
 
@@ -130,7 +129,6 @@ namespace SpaceShooter
             boomSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/boom.png"));
             shieldSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/playerShield.png"));
             nanoSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/NanoBots.png"));
-            boardSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/boardItem.png"));
         }
 
         private void SetUpStarfield()
@@ -148,7 +146,7 @@ namespace SpaceShooter
             Canvas.SetTop(Player, 518);
         }
 
-        private void DrawStarField()
+        private void DrawParallaxStarField()
         {
             Canvas.SetBottom(background1, Canvas.GetBottom(background1) - 5);
             Canvas.SetBottom(background2, Canvas.GetBottom(background2) - 5);
@@ -259,7 +257,7 @@ namespace SpaceShooter
         {
             foreach (Rectangle bullet in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet"))
             {
-                Canvas.SetTop(bullet, Canvas.GetTop(bullet) - gameState.BulletSpeed);
+                Canvas.SetTop(bullet, Canvas.GetTop(bullet) - GameState.BulletSpeed);
             }
         }
 
@@ -378,12 +376,12 @@ namespace SpaceShooter
             SetUpGame();
         }
 
-        private void OnEnemiesCounted()
+        private void OnTriggerEnemySpawn()
         {
             SpawnEnemy();
         }
 
-        private void OnNanosCounted()
+        private void OnTriggerNanoSpawn()
         {
             SpawnNano();
         }

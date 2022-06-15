@@ -26,12 +26,12 @@ namespace SpaceShooter
         public int Damage { get; set; }
         public int Level { get => level; }
         public static int PlayerSpeed { get => PlayerInitSpeed; }
-        public int BulletSpeed { get => BulletInitSpeed; }
+        public static int BulletSpeed { get => BulletInitSpeed; }
         public int EnemyLimit { get => enemyLimit; }
 
-        public event Action? EnemiesCounted;
+        public event Action? TriggerEnemySpawn;
 
-        public event Action? NanosCounted;
+        public event Action? TriggerNanoSpawn;
 
         public event Action? GameEnded;
 
@@ -65,7 +65,7 @@ namespace SpaceShooter
 
             if (enemyCounter < 0)
             {
-                EnemiesCounted?.Invoke();
+                TriggerEnemySpawn?.Invoke();
                 enemyCounter = enemyLimit;
             }
         }
@@ -76,7 +76,7 @@ namespace SpaceShooter
 
             if (nanoCounter < 0)
             {
-                NanosCounted?.Invoke();
+                TriggerNanoSpawn?.Invoke();
                 nanoCounter = nanoLimit;
             }
         }
@@ -91,11 +91,11 @@ namespace SpaceShooter
             {
                 if (Score != 0 && Score % 10 == 0)
                 {
-                    enemySpeed = EnemyInitSpeed + (int)Math.Ceiling((double)Level / (double)EnemyInitSpeed);
+                    enemySpeed = EnemyInitSpeed + (int)Math.Ceiling((double)Level / EnemyInitSpeed);
                 }
                 else
                 {
-                    enemyLimit = EnemyInitLimit - ((int)Math.Ceiling((double)Level / ((double)EnemyInitLimit / 10)) * 10) - (int)Math.Ceiling((EnemyInitLimit - Level) / 10.0);
+                    enemyLimit = EnemyInitLimit - ((int)Math.Ceiling(Level / (EnemyInitLimit / 10.0)) * 10) - (int)Math.Ceiling((EnemyInitLimit - Level) / 10.0);
                     if (enemyLimit < 2)
                     {
                         enemyLimit = 1;
