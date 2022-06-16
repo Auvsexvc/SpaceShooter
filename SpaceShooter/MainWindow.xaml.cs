@@ -344,12 +344,12 @@ namespace SpaceShooter
             {
                 if (Canvas.GetLeft(uRect) - 30 <= Canvas.GetLeft(bullet) && Canvas.GetLeft(uRect) + uRect.Width + 30 >= Canvas.GetLeft(bullet) + bullet.Width)
                 {
-                    if (uObj!.Evasion)
+                    if (uObj!.EvadesLeft)
                     {
                         if (Canvas.GetLeft(uRect) - uObj!.Speed > SpawnMinCanvasWidth)
                         {
                             uObj.TakesEvasiveManeuver = true;
-                            Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) - uObj!.Speed);
+                            Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) - (uObj!.Speed - 2));
                         }
                     }
                     else
@@ -357,7 +357,7 @@ namespace SpaceShooter
                         if (Canvas.GetLeft(uRect) - uObj!.Speed < SpawnMaxCanvasWidth)
                         {
                             uObj.TakesEvasiveManeuver = true;
-                            Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + uObj!.Speed);
+                            Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + (uObj!.Speed - 2));
                         }
                     }
                     if (uObj.Shooting)

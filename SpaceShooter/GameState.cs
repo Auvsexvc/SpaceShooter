@@ -39,6 +39,7 @@ namespace SpaceShooter
         public int EnemyLimit { get => enemyLimit; }
 
         public event Action<UnindentifiedFlyingObject>? TriggerSpawnModel;
+
         public event Action? TriggerSpawnAsteroidModel;
 
         public event Action? GameEnded;
@@ -108,6 +109,7 @@ namespace SpaceShooter
             Ufos!.Add(newNano);
             TriggerSpawnModel?.Invoke(newNano);
         }
+
         public void SpawnAsteroid()
         {
             TriggerSpawnAsteroidModel?.Invoke();

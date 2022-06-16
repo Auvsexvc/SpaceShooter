@@ -10,7 +10,7 @@ namespace SpaceShooter
             Guid = Guid.NewGuid();
             Tracking = homing;
             Shooting = shooting;
-            Evasion = evasion;
+            EvadesLeft = evasion;
         }
     }
 }
