@@ -12,6 +12,7 @@ namespace SpaceShooter
         private const int PlayerInitSpeed = 14;
         private const int BulletInitSpeed = 20;
         private const int EnemyBulletInitSpeed = 15;
+        private const int AsteroidLimit = 1000;
         private readonly Random rnd = new();
 
         private int enemyLimit;
@@ -22,6 +23,7 @@ namespace SpaceShooter
         private int nanoCounter;
         private int level;
         private bool levelRised;
+        private int asteroidCounter;
 
         public List<UnindentifiedFlyingObject> Ufos { get; } = new();
         public int EnemyCounter { get => enemyCounter; }
@@ -39,6 +41,7 @@ namespace SpaceShooter
         public event Action<Enemy>? TriggerSpawnEnemyModel;
 
         public event Action<Nano>? TriggerSpawnNanoModel;
+        public event Action? TriggerSpawnAsteroidModel;
 
         public event Action? GameEnded;
 
@@ -90,11 +93,26 @@ namespace SpaceShooter
             }
         }
 
+        public void CountDownToAsteroidSpawn()
+        {
+            asteroidCounter--;
+
+            if (asteroidCounter < 0)
+            {
+                SpawnAsteroid();
+                asteroidCounter = AsteroidLimit;
+            }
+        }
+
         public void SpawnNano()
         {
             Nano newNano = new(rnd.Next(NanoInitSpeed, nanoSpeed + 1 + (int)Math.Ceiling((double)level / NanoInitSpeed)));
             Ufos!.Add(newNano);
             TriggerSpawnNanoModel?.Invoke(newNano);
+        }
+        public void SpawnAsteroid()
+        {
+            TriggerSpawnAsteroidModel?.Invoke();
         }
 
         public void SpawnEnemy()

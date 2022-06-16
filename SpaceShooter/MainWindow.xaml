@@ -7,9 +7,10 @@
         mc:Ignorable="d"
         Icon="Assets/boardItem.png"
         Title="SpaceShooter" Height="615" Width="540" Background="Black">
+
     <Grid>
-    <Viewbox Stretch="Fill">
-        <Canvas Name="GameCanvas" Focusable="True" Background="Black" KeyDown="OnKeyDown" KeyUp="OnKeyUp" Height="615" Width="540">
+        <Viewbox Stretch="Fill">
+            <Canvas Name="GameCanvas" Focusable="True" Background="Black" KeyDown="OnKeyDown" KeyUp="OnKeyUp" Height="615" Width="540">
             <Rectangle Name ="background1" Height="707" Width="540" Fill="Orange" Canvas.Bottom="0"/>
             <Rectangle Name ="background2" Height="707" Width="540" Fill="LightGreen" Canvas.Bottom="707"/>
             <Rectangle Name="Player" Height="50" Width="60" Fill="Yellow" Canvas.Left="246" Canvas.Top="518"/>

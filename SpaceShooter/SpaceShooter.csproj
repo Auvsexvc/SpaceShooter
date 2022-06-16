@@ -19,6 +19,8 @@
     <None Remove="Assets\7.png" />
     <None Remove="Assets\8.png" />
     <None Remove="Assets\9.png" />
+    <None Remove="Assets\asteroids.png" />
+    <None Remove="Assets\AuvsexvcLibra.mp3" />
     <None Remove="Assets\boardItem.png" />
     <None Remove="Assets\boom.png" />
     <None Remove="Assets\NanoBots.png" />
@@ -42,6 +44,8 @@
     <Resource Include="Assets\7.png" />
     <Resource Include="Assets\8.png" />
     <Resource Include="Assets\9.png" />
+    <Resource Include="Assets\asteroids.png" />
+    <Resource Include="Assets\AuvsexvcLibra.mp3" />
     <Resource Include="Assets\boardItem.png" />
     <Resource Include="Assets\boom.png" />
     <Resource Include="Assets\NanoBots.png" />

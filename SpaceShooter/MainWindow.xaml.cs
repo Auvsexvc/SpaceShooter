@@ -27,6 +27,7 @@ namespace SpaceShooter
         private readonly ImageBrush nanoSprite = new();
         private readonly ImageBrush boomSprite = new();
         private readonly ImageBrush shieldSprite = new();
+        private readonly ImageBrush asteroidsSprite = new();
         private readonly DispatcherTimer timer = new();
 
         private readonly List<Rectangle> garbageCollector = new();
@@ -61,6 +62,7 @@ namespace SpaceShooter
 
             gameState.TriggerSpawnEnemyModel += OnEnemySpawn;
             gameState.TriggerSpawnNanoModel += OnNanoSpawn;
+            gameState.TriggerSpawnAsteroidModel += OnAsteroidSpawn;
             gameState.GameEnded += OnGameEnded;
             gameState.GameRestarted += OnGameRestarted;
         }
@@ -78,6 +80,9 @@ namespace SpaceShooter
             gameState.CountDownToEnemySpawn();
 
             gameState.CountDownToNanoSpawn();
+            gameState.CountDownToAsteroidSpawn();
+
+            MoveAsteroids();
 
             MovePlayer();
 
@@ -138,6 +143,7 @@ namespace SpaceShooter
             boomSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/boom.png"));
             shieldSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/playerShield.png"));
             nanoSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/NanoBots.png"));
+            asteroidsSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/asteroids.png"));
         }
 
         private void SetUpStarfield()
@@ -168,6 +174,22 @@ namespace SpaceShooter
             {
                 Canvas.SetBottom(background2, Canvas.GetBottom(background1) + background1.Height);
             }
+        }
+
+        private void SpawnAsteroidModel()
+        {
+            Rectangle newAsteroid = new()
+            {
+                Tag = "Asteroids",
+                Height = GameCanvas.Height,
+                Width = GameCanvas.Width,
+                Fill = asteroidsSprite,
+                Stretch = Stretch.Uniform
+            };
+            Canvas.SetTop(newAsteroid, rnd.Next(-2000, -680));
+            Canvas.SetLeft(newAsteroid, rnd.Next(0, (int)GameCanvas.Width));
+            Canvas.SetZIndex(newAsteroid, Canvas.GetZIndex(GameCanvas) + 1);
+            GameCanvas.Children.Add(newAsteroid);
         }
 
         private void SpawnEnemyModel(Enemy enemy)
@@ -317,7 +339,7 @@ namespace SpaceShooter
 
             if (Canvas.GetTop(uRect) > Canvas.GetTop(bullet) - 450)
             {
-                if (Canvas.GetLeft(uRect) - 40 <= Canvas.GetLeft(bullet) && Canvas.GetLeft(uRect) + uRect.Width + 40 >= Canvas.GetLeft(bullet) + bullet.Width)
+                if (Canvas.GetLeft(uRect) - 30 <= Canvas.GetLeft(bullet) && Canvas.GetLeft(uRect) + uRect.Width + 30 >= Canvas.GetLeft(bullet) + bullet.Width)
                 {
                     if (uObj!.Evasion)
                     {
@@ -334,6 +356,10 @@ namespace SpaceShooter
                             uObj.TakesEvasiveManeuver = true;
                             Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + uObj!.Speed);
                         }
+                    }
+                    if (uObj.Shooting)
+                    {
+                        EnemyShoots(uObj);
                     }
                 }
             }
@@ -392,6 +418,14 @@ namespace SpaceShooter
             foreach (Rectangle nano in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Nano"))
             {
                 Canvas.SetTop(nano, Canvas.GetTop(nano) + gameState.Ufos.Where(u => u.Guid.ToString() == nano.Uid).Select(u => u.Speed).FirstOrDefault());
+            }
+        }
+
+        private void MoveAsteroids()
+        {
+            foreach (Rectangle nano in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Asteroids"))
+            {
+                Canvas.SetTop(nano, Canvas.GetTop(nano) + 5);
             }
         }
 
@@ -525,6 +559,11 @@ namespace SpaceShooter
             SpawnNanoModel(newNano);
         }
 
+        private void OnAsteroidSpawn()
+        {
+            SpawnAsteroidModel();
+        }
+
         private async void OnGameEnded()
         {
             Player.Fill = boomSprite;
@@ -542,19 +581,19 @@ namespace SpaceShooter
         {
             switch (e.Key)
             {
-                case Key.Left:
+                case Key.A:
                     gameControls.MoveLeft = true;
                     break;
 
-                case Key.Right:
+                case Key.D:
                     gameControls.MoveRight = true;
                     break;
 
-                case Key.Up:
+                case Key.W:
                     gameControls.MoveUp = true;
                     break;
 
-                case Key.Down:
+                case Key.S:
                     gameControls.MoveDown = true;
                     break;
 
@@ -568,19 +607,19 @@ namespace SpaceShooter
         {
             switch (e.Key)
             {
-                case Key.Left:
+                case Key.A:
                     gameControls.MoveLeft = false;
                     break;
 
-                case Key.Right:
+                case Key.D:
                     gameControls.MoveRight = false;
                     break;
 
-                case Key.Up:
+                case Key.W:
                     gameControls.MoveUp = false;
                     break;
 
-                case Key.Down:
+                case Key.S:
                     gameControls.MoveDown = false;
                     break;
             }
