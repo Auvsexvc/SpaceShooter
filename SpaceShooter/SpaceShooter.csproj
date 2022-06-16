@@ -23,9 +23,10 @@
     <None Remove="Assets\AuvsexvcLibra.mp3" />
     <None Remove="Assets\boardItem.png" />
     <None Remove="Assets\boom.png" />
-    <None Remove="Assets\NanoBots.png" />
+    <None Remove="Assets\nano.png" />
     <None Remove="Assets\player.png" />
     <None Remove="Assets\playerShield.png" />
+    <None Remove="Assets\skull.png" />
     <None Remove="Assets\StarField.jpg" />
   </ItemGroup>
 
@@ -48,9 +49,10 @@
     <Resource Include="Assets\AuvsexvcLibra.mp3" />
     <Resource Include="Assets\boardItem.png" />
     <Resource Include="Assets\boom.png" />
-    <Resource Include="Assets\NanoBots.png" />
+    <Resource Include="Assets\nano.png" />
     <Resource Include="Assets\player.png" />
     <Resource Include="Assets\playerShield.png" />
+    <Resource Include="Assets\skull.png" />
     <Resource Include="Assets\StarField.jpg" />
   </ItemGroup>
 

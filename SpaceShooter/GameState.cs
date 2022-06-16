@@ -6,13 +6,13 @@ namespace SpaceShooter
     internal class GameState
     {
         private const int EnemyInitLimit = 60;
-        private const int NanoInitLimit = 150;
+        private const int NanoInitLimit = 750;
         private const int EnemyInitSpeed = 6;
         private const int NanoInitSpeed = 6;
         private const int PlayerInitSpeed = 14;
         private const int BulletInitSpeed = 20;
         private const int EnemyBulletInitSpeed = 15;
-        private const int AsteroidLimit = 1000;
+        private const int AsteroidLimit = 900;
         private readonly Random rnd = new();
 
         private int enemyLimit;
@@ -38,9 +38,7 @@ namespace SpaceShooter
 
         public int EnemyLimit { get => enemyLimit; }
 
-        public event Action<Enemy>? TriggerSpawnEnemyModel;
-
-        public event Action<Nano>? TriggerSpawnNanoModel;
+        public event Action<UnindentifiedFlyingObject>? TriggerSpawnModel;
         public event Action? TriggerSpawnAsteroidModel;
 
         public event Action? GameEnded;
@@ -108,7 +106,7 @@ namespace SpaceShooter
         {
             Nano newNano = new(rnd.Next(NanoInitSpeed, nanoSpeed + 1 + (int)Math.Ceiling((double)level / NanoInitSpeed)));
             Ufos!.Add(newNano);
-            TriggerSpawnNanoModel?.Invoke(newNano);
+            TriggerSpawnModel?.Invoke(newNano);
         }
         public void SpawnAsteroid()
         {
@@ -119,7 +117,7 @@ namespace SpaceShooter
         {
             Enemy newEnemy = new(rnd.Next(EnemyInitSpeed, enemySpeed + 1 + (int)Math.Ceiling((double)level / enemySpeed)), rnd.Next(1, 7) <= 3, rnd.Next(1, 7) <= 3, rnd.Next(1, 7) <= 3);
             Ufos!.Add(newEnemy);
-            TriggerSpawnEnemyModel?.Invoke(newEnemy);
+            TriggerSpawnModel?.Invoke(newEnemy);
         }
 
         public void MakeGameHarder()
