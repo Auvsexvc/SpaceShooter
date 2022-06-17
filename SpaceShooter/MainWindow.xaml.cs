@@ -284,7 +284,7 @@ namespace SpaceShooter
             {
                 Damage.Foreground = Brushes.Yellow;
             }
-            else if (gameState.Damage < 50)
+            else
             {
                 Damage.Foreground = Brushes.White;
             }
@@ -466,16 +466,15 @@ namespace SpaceShooter
                 {
                     Rect enemyHitBox = new(Canvas.GetLeft(item), Canvas.GetTop(item), item.Width, item.Height);
 
-                    if (Canvas.GetTop(item) > 650)
-                    {
-                        garbageCollector.Add(item);
-                        gameState.Damage += 10;
-                    }
-
                     if (playerHitBox.IntersectsWith(enemyHitBox))
                     {
                         Player.Fill = shieldSprite;
                         gameState.Damage++;
+                    }
+                    else if (Canvas.GetTop(item) > 650)
+                    {
+                        garbageCollector.Add(item);
+                        gameState.Damage += 10;
                     }
                 }
 
@@ -483,15 +482,14 @@ namespace SpaceShooter
                 {
                     Rect enemyHitBox = new(Canvas.GetLeft(item), Canvas.GetTop(item), item.Width, item.Height);
 
-                    if (Canvas.GetTop(item) > 650)
-                    {
-                        garbageCollector.Add(item);
-                    }
-
                     if (playerHitBox.IntersectsWith(enemyHitBox))
                     {
                         Player.Fill = shieldSprite;
                         gameState.Damage += 10;
+                        garbageCollector.Add(item);
+                    }
+                    else if (Canvas.GetTop(item) > 650)
+                    {
                         garbageCollector.Add(item);
                     }
                 }
@@ -499,11 +497,6 @@ namespace SpaceShooter
                 if ((string)item.Tag == "Nano")
                 {
                     Rect nanoHitBox = new(Canvas.GetLeft(item), Canvas.GetTop(item), item.Width, item.Height);
-
-                    if (Canvas.GetTop(item) > 650)
-                    {
-                        garbageCollector.Add(item);
-                    }
 
                     if (playerHitBox.IntersectsWith(nanoHitBox) && gameState.Damage > 0)
                     {
@@ -516,6 +509,10 @@ namespace SpaceShooter
                         {
                             gameState.Damage = 0;
                         }
+                    }
+                    else if (Canvas.GetTop(item) > 650)
+                    {
+                        garbageCollector.Add(item);
                     }
                 }
             }
