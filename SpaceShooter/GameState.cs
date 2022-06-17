@@ -128,7 +128,7 @@ namespace SpaceShooter
             {
                 levelRised = false;
             }
-            if (Score % 5 == 0 && !levelRised)
+            else if (Score % 5 == 0 && !levelRised)
             {
                 if (Score != 0 && Score % 10 == 0)
                 {

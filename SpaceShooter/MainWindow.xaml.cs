@@ -284,7 +284,7 @@ namespace SpaceShooter
             {
                 Damage.Foreground = Brushes.Yellow;
             }
-            if (gameState.Damage < 50)
+            else if (gameState.Damage < 50)
             {
                 Damage.Foreground = Brushes.White;
             }
