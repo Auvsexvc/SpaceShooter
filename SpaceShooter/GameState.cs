@@ -46,6 +46,8 @@ namespace SpaceShooter
 
         public event Action? GameRestarted;
 
+        public bool IsGameOver { get; set; }
+
         public GameState()
         {
             Score = 0;
@@ -67,6 +69,7 @@ namespace SpaceShooter
         public void GameOver()
         {
             Damage = 100;
+            IsGameOver = true;
             GameEnded?.Invoke();
         }
 
@@ -159,6 +162,7 @@ namespace SpaceShooter
             enemyLimit = EnemyInitLimit;
             nanoSpeed = NanoInitSpeed;
             nanoLimit = NanoInitLimit;
+            IsGameOver = false;
             Ufos.Clear();
             GameRestarted?.Invoke();
         }

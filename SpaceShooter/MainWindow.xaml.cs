@@ -10,7 +10,6 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using System.Windows.Threading;
 
 namespace SpaceShooter
 {
@@ -19,6 +18,9 @@ namespace SpaceShooter
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const int maxDelay = 17;
+        private const int minDelay = 17;
+
         private readonly GameState gameState = new();
         private readonly GameControls gameControls = new();
 
@@ -29,8 +31,6 @@ namespace SpaceShooter
         private readonly ImageBrush shieldSprite = new();
         private readonly ImageBrush skullSprite = new();
         private readonly ImageBrush asteroidsSprite = new();
-        private readonly DispatcherTimer timer = new();
-
         private readonly List<Rectangle> garbageCollector = new();
         private readonly Random rnd = new();
         private readonly Stopwatch stw = new();
@@ -56,9 +56,6 @@ namespace SpaceShooter
         public MainWindow()
         {
             InitializeComponent();
-
-            InitializeGameTimer();
-
             SetUpGame();
 
             gameState.TriggerSpawnModel += OnUfoSpawn;
@@ -67,50 +64,55 @@ namespace SpaceShooter
             gameState.GameRestarted += OnGameRestarted;
         }
 
-        private void InitializeGameTimer()
+        private async void GameCanvas_Loaded(object sender, RoutedEventArgs e)
         {
-            timer.Interval = TimeSpan.FromMilliseconds(20);
-            timer.Tick += GameLoop;
+            await GameLoop();
         }
 
-        private void GameLoop(object? sender, EventArgs e)
+        private async Task GameLoop()
         {
-            DrawParallaxStarField();
-
-            gameState.CountDownToEnemySpawn();
-
-            gameState.CountDownToNanoSpawn();
-            gameState.CountDownToAsteroidSpawn();
-
-            MoveAsteroids();
-
-            MovePlayer();
-
-            UpdatePlayerModel();
-
-            _ = GetBulletCollision();
-
-            MoveBullets();
-
-            MoveUfos();
-
-            GetPlayerCollision();
-
-            UpdateDamage();
-
-            UpdateScore();
-
-            CleanUpGarbageCollector();
-
-            gameState.MakeGameHarder();
-
-            if (gameState.IsPlayerDestroyed())
+            while (!gameState.IsGameOver)
             {
-                gameState.GameOver();
+                int delay = Math.Max(minDelay, maxDelay);
+                await Task.Delay(delay);
+
+                DrawParallaxStarField();
+
+                gameState.CountDownToEnemySpawn();
+
+                gameState.CountDownToNanoSpawn();
+                gameState.CountDownToAsteroidSpawn();
+
+                MoveAsteroids();
+
+                MovePlayer();
+
+                UpdatePlayerModel();
+
+                _ = GetBulletCollision();
+
+                MoveBullets();
+
+                MoveUfos();
+
+                GetPlayerCollision();
+
+                UpdateDamage();
+
+                UpdateScore();
+
+                CleanUpGarbageCollector();
+
+                gameState.MakeGameHarder();
+
+                if (gameState.IsPlayerDestroyed())
+                {
+                    gameState.GameOver();
+                }
             }
         }
 
-        private void SetUpGame()
+        private async void SetUpGame()
         {
             ClearGameCanvas();
             SetUpSprites();
@@ -121,7 +123,7 @@ namespace SpaceShooter
             CleanUpGarbageCollector();
 
             GameCanvas.Focus();
-            timer.Start();
+            await GameLoop();
         }
 
         private void ClearGameCanvas()
@@ -236,7 +238,7 @@ namespace SpaceShooter
 
         private void SpawnBullet(UnindentifiedFlyingObject uObj)
         {
-            Rectangle enemy = GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy").First(r => r.Uid == uObj.Guid.ToString());
+            Rectangle shooter = GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy").First(r => r.Uid == uObj.Guid.ToString());
             Rectangle newBullet = new()
             {
                 Tag = $"{uObj.GetType().Name}Bullet",
@@ -245,8 +247,8 @@ namespace SpaceShooter
                 Fill = Brushes.LightGoldenrodYellow,
                 Stroke = Brushes.Red,
             };
-            Canvas.SetLeft(newBullet, Canvas.GetLeft(enemy) + (enemy.Width / 2));
-            Canvas.SetTop(newBullet, Canvas.GetTop(enemy) + enemy.Height);
+            Canvas.SetLeft(newBullet, Canvas.GetLeft(shooter) + (shooter.Width / 2));
+            Canvas.SetTop(newBullet, Canvas.GetTop(shooter) + shooter.Height);
             GameCanvas.Children.Add(newBullet);
         }
 
@@ -360,6 +362,7 @@ namespace SpaceShooter
                             Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + (uObj!.Speed - 2));
                         }
                     }
+
                     if (uObj.Shooting)
                     {
                         EnemyShoots(uObj);
@@ -412,7 +415,7 @@ namespace SpaceShooter
         private void EnemyShoots(UnindentifiedFlyingObject uObj)
         {
             stw.Start();
-            if (stw.ElapsedMilliseconds % timer.Interval.TotalMilliseconds == 0)
+            if (stw.ElapsedMilliseconds % 20 == 0)
                 SpawnBullet(uObj);
         }
 
@@ -546,7 +549,6 @@ namespace SpaceShooter
         private async void OnGameEnded()
         {
             Player.Fill = boomSprite;
-            timer.Stop();
             Damage.Content = $"Damage: {gameState.Damage}";
             Damage.Foreground = Brushes.Red;
             await Task.Delay(200);
