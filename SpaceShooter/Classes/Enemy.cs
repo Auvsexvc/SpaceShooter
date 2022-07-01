@@ -6,18 +6,7 @@ namespace SpaceShooter.Classes
     internal class Enemy : GameObject
     {
         private const int EnemyInitSpeed = 6;
-        public Enemy(int speed, bool homing = false, bool shooting = false, bool evasion = false)
-        {
-            Random rnd = new Random();
-            Speed = speed;
-            Guid = Guid.NewGuid();
-            Tracking = homing;
-            Shooting = shooting;
-            EvadesLeft = evasion;
-            FireDelay = new Stopwatch();
-            FireDelay.Start();
-            RateOfFire = rnd.Next(10, 25);
-        }
+
         public Enemy(int speed, int level)
         {
             Random rnd = new Random();

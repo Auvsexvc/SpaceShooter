@@ -52,7 +52,7 @@ namespace SpaceShooter
         {
             foreach (Rectangle item in _garbageCollector)
             {
-                _gameState.RemoveGameObjectsByUid(item.Uid);
+                _gameState.RemoveGameObjectByUid(item.Uid);
                 GameCanvas.Children.Remove(item);
             }
         }
@@ -230,7 +230,7 @@ namespace SpaceShooter
 
                 MoveBullets();
 
-                MoveUfos();
+                MoveObjects();
 
                 GetPlayerCollision();
 
@@ -383,6 +383,23 @@ namespace SpaceShooter
             }
         }
 
+        private void MoveObjects()
+        {
+            foreach (GameObject gameObject in _gameState.GetGameObjects())
+            {
+                Rectangle enemyRect = GameCanvas.Children.OfType<Rectangle>().FirstOrDefault(rect => gameObject.Guid.ToString() == rect.Uid)!;
+                if (enemyRect is not null)
+                {
+                    Canvas.SetTop(enemyRect, Canvas.GetTop(enemyRect) + gameObject!.Speed);
+                    if (gameObject is Enemy enemyObject)
+                    {
+                        EnemyIsTrackingPlayer(enemyObject, enemyRect);
+                        EnemyIsAShooter(enemyObject, enemyRect);
+                    }
+                }
+            }
+        }
+
         private void MovePlayer()
         {
             if (_gameState.GetPlayer().MoveLeft && Canvas.GetLeft(_playerModel.GetUIElement()) > _playerModel.GetShape().Width / 2)
@@ -400,23 +417,6 @@ namespace SpaceShooter
             if (_gameState.GetPlayer().MoveDown && Canvas.GetTop(_playerModel.GetUIElement()) + _playerModel.GetShape().Height < GameCanvas.Height - (_playerModel.GetShape().Height / 2))
             {
                 Canvas.SetTop(_playerModel.GetUIElement(), Canvas.GetTop(_playerModel.GetUIElement()) + (_gameState.GetPlayer().Speed / 2));
-            }
-        }
-
-        private void MoveUfos()
-        {
-            foreach (GameObject gameObject in _gameState.GetGameObjects())
-            {
-                Rectangle enemyRect = GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == $"{gameObject.GetType().Name}").FirstOrDefault(rect => gameObject.Guid.ToString() == rect.Uid)!;
-                if (enemyRect is not null)
-                {
-                    Canvas.SetTop(enemyRect, Canvas.GetTop(enemyRect) + gameObject!.Speed);
-                    if (gameObject is Enemy enemyObject)
-                    {
-                        EnemyIsTrackingPlayer(enemyObject, enemyRect);
-                        EnemyIsAShooter(enemyObject, enemyRect);
-                    }
-                }
             }
         }
 
@@ -554,7 +554,7 @@ namespace SpaceShooter
 
         private void SpawnBullet(GameObject uObj)
         {
-            Rectangle shooter = GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy").First(r => r.Uid == uObj.Guid.ToString());
+            Rectangle shooter = GameCanvas.Children.OfType<Rectangle>().First(r => r.Uid == uObj.Guid.ToString());
             BulletModel newBullet = new(uObj);
             Canvas.SetLeft(newBullet.GetUIElement(), Canvas.GetLeft(shooter) + (shooter.Width / 2));
             Canvas.SetTop(newBullet.GetUIElement(), Canvas.GetTop(shooter) + shooter.Height);

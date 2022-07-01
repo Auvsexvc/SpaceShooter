@@ -12,7 +12,7 @@ namespace SpaceShooter.Models
         {
             uIElement = new Rectangle()
             {
-                Tag = $"Nano",
+                Tag = "Nano",
                 Uid = uObj.Guid.ToString(),
                 Height = 50,
                 Width = 56,

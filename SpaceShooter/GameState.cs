@@ -132,7 +132,7 @@ namespace SpaceShooter
             }
         }
 
-        public void RemoveGameObjectsByUid(string uid) =>
+        public void RemoveGameObjectByUid(string uid) =>
             _gameObjects.Remove(_gameObjects.Find(e => e.Guid.ToString() == uid)!);
 
         public void Reset()
@@ -157,14 +157,14 @@ namespace SpaceShooter
         public void SpawnEnemy()
         {
             Enemy newEnemy = new(enemySpeed, Level);
-            _gameObjects!.Add(newEnemy);
+            _gameObjects.Add(newEnemy);
             TriggerSpawnModel?.Invoke(newEnemy);
         }
 
         public void SpawnNano()
         {
             Nano newNano = new(nanoSpeed, Level);
-            _gameObjects!.Add(newNano);
+            _gameObjects.Add(newNano);
             TriggerSpawnModel?.Invoke(newNano);
         }
     }
