@@ -2,13 +2,13 @@
 
 namespace SpaceShooter
 {
-    internal class UnindentifiedFlyingObject
+    internal abstract class UnindentifiedFlyingObject
     {
-        public Guid Guid { get; set; }
-        public int Speed { get; set; }
-        public bool Tracking { get; set; }
-        public bool Shooting { get; set; }
         public bool EvadesLeft { get; set; }
+        public Guid Guid { get; set; }
+        public bool Shooting { get; set; }
+        public int Speed { get; set; }
         public bool TakesEvasiveManeuver { get; set; }
+        public bool Tracking { get; set; }
     }
 }

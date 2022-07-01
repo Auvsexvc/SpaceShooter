@@ -5,48 +5,25 @@ namespace SpaceShooter
 {
     internal class GameState
     {
-        private const int EnemyInitLimit = 60;
-        private const int NanoInitLimit = 750;
-        private const int EnemyInitSpeed = 6;
-        private const int NanoInitSpeed = 6;
-        private const int PlayerInitSpeed = 14;
+        private const int AsteroidLimit = 900;
         private const int BulletInitSpeed = 20;
         private const int EnemyBulletInitSpeed = 15;
-        private const int AsteroidLimit = 900;
+        private const int EnemyInitLimit = 60;
+        private const int EnemyInitSpeed = 6;
+        private const int NanoInitLimit = 750;
+        private const int NanoInitSpeed = 6;
+        private const int PlayerInitSpeed = 14;
         private readonly Random rnd = new();
 
-        private int enemyLimit;
-        private int nanoLimit;
-        private int enemySpeed;
-        private int nanoSpeed;
+        private int asteroidCounter;
         private int enemyCounter;
-        private int nanoCounter;
+        private int enemyLimit;
+        private int enemySpeed;
         private int level;
         private bool levelRised;
-        private int asteroidCounter;
-
-        public List<UnindentifiedFlyingObject> Ufos { get; } = new();
-        public int EnemyCounter { get => enemyCounter; }
-        public int EnemySpeed { get => enemySpeed; }
-        public int NanoSpeed { get => nanoSpeed; }
-        public int Score { get; set; }
-        public int Damage { get; set; }
-        public int Level { get => level; }
-        public static int PlayerSpeed { get => PlayerInitSpeed; }
-        public static int BulletSpeed { get => BulletInitSpeed; }
-        public static int EnemyBulletSpeed { get => EnemyBulletInitSpeed; }
-
-        public int EnemyLimit { get => enemyLimit; }
-
-        public event Action<UnindentifiedFlyingObject>? TriggerSpawnModel;
-
-        public event Action? TriggerSpawnAsteroidModel;
-
-        public event Action? GameEnded;
-
-        public event Action? GameRestarted;
-
-        public bool IsGameOver { get; set; }
+        private int nanoCounter;
+        private int nanoLimit;
+        private int nanoSpeed;
 
         public GameState()
         {
@@ -61,16 +38,36 @@ namespace SpaceShooter
             nanoCounter = NanoInitLimit;
         }
 
-        public bool IsPlayerDestroyed()
-        {
-            return Damage > 99;
-        }
+        public event Action? GameEnded;
 
-        public void GameOver()
+        public event Action? GameRestarted;
+
+        public event Action? TriggerSpawnAsteroidModel;
+
+        public event Action<UnindentifiedFlyingObject>? TriggerSpawnModel;
+
+        public static int BulletSpeed { get => BulletInitSpeed; }
+        public static int EnemyBulletSpeed { get => EnemyBulletInitSpeed; }
+        public static int PlayerSpeed { get => PlayerInitSpeed; }
+        public int Damage { get; set; }
+        public int EnemyCounter { get => enemyCounter; }
+        public int EnemyLimit { get => enemyLimit; }
+        public int EnemySpeed { get => enemySpeed; }
+        public bool IsGameOver { get; set; }
+        public int Level { get => level; }
+        public int NanoSpeed { get => nanoSpeed; }
+        public int Score { get; set; }
+        public List<UnindentifiedFlyingObject> Ufos { get; } = new();
+
+        public void CountDownToAsteroidSpawn()
         {
-            Damage = 100;
-            IsGameOver = true;
-            GameEnded?.Invoke();
+            asteroidCounter--;
+
+            if (asteroidCounter < 0)
+            {
+                SpawnAsteroid();
+                asteroidCounter = AsteroidLimit;
+            }
         }
 
         public void CountDownToEnemySpawn()
@@ -95,34 +92,16 @@ namespace SpaceShooter
             }
         }
 
-        public void CountDownToAsteroidSpawn()
+        public void GameOver()
         {
-            asteroidCounter--;
-
-            if (asteroidCounter < 0)
-            {
-                SpawnAsteroid();
-                asteroidCounter = AsteroidLimit;
-            }
+            Damage = 100;
+            IsGameOver = true;
+            GameEnded?.Invoke();
         }
 
-        public void SpawnNano()
+        public bool IsPlayerDestroyed()
         {
-            Nano newNano = new(rnd.Next(NanoInitSpeed, nanoSpeed + 1 + (int)Math.Ceiling((double)level / NanoInitSpeed)));
-            Ufos!.Add(newNano);
-            TriggerSpawnModel?.Invoke(newNano);
-        }
-
-        public void SpawnAsteroid()
-        {
-            TriggerSpawnAsteroidModel?.Invoke();
-        }
-
-        public void SpawnEnemy()
-        {
-            Enemy newEnemy = new(rnd.Next(EnemyInitSpeed, enemySpeed + 1 + (int)Math.Ceiling((double)level / enemySpeed)), rnd.Next(1, 7) <= 3, rnd.Next(1, 7) <= 3, rnd.Next(1, 7) <= 3);
-            Ufos!.Add(newEnemy);
-            TriggerSpawnModel?.Invoke(newEnemy);
+            return Damage > 99;
         }
 
         public void MakeGameHarder()
@@ -165,6 +144,25 @@ namespace SpaceShooter
             IsGameOver = false;
             Ufos.Clear();
             GameRestarted?.Invoke();
+        }
+
+        public void SpawnAsteroid()
+        {
+            TriggerSpawnAsteroidModel?.Invoke();
+        }
+
+        public void SpawnEnemy()
+        {
+            Enemy newEnemy = new(rnd.Next(EnemyInitSpeed, enemySpeed + 1 + (int)Math.Ceiling((double)level / enemySpeed)), rnd.Next(1, 7) <= 3, rnd.Next(1, 7) <= 3, rnd.Next(1, 7) <= 3);
+            Ufos!.Add(newEnemy);
+            TriggerSpawnModel?.Invoke(newEnemy);
+        }
+
+        public void SpawnNano()
+        {
+            Nano newNano = new(rnd.Next(NanoInitSpeed, nanoSpeed + 1 + (int)Math.Ceiling((double)level / NanoInitSpeed)));
+            Ufos!.Add(newNano);
+            TriggerSpawnModel?.Invoke(newNano);
         }
     }
 }

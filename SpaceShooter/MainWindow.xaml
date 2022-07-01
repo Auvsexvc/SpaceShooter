@@ -1,24 +1,20 @@
 ﻿<Window x:Class="SpaceShooter.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SpaceShooter"
         mc:Ignorable="d"
-        Icon="Assets/boardItem.png"
         Title="SpaceShooter" Height="615" Width="540" Background="Black">
-
     <Grid>
         <Viewbox Stretch="Fill">
             <Canvas Name="GameCanvas" Focusable="True" Background="Black" KeyDown="OnKeyDown" KeyUp="OnKeyUp" Height="615" Width="540">
-            <Rectangle Name ="background1" Height="707" Width="540" Fill="Orange" Canvas.Bottom="0"/>
-            <Rectangle Name ="background2" Height="707" Width="540" Fill="LightGreen" Canvas.Bottom="707"/>
-            <Rectangle Name="Player" Height="50" Width="60" Fill="Yellow" Canvas.Left="246" Canvas.Top="518"/>
-            <Label Name="ScoreText" Content="Score: 0" FontSize="18" FontWeight="Bold" Foreground="White" Canvas.Left="0" Margin="20,10,0,0"/>
-            <Label Name="Damage" Content="Damage: 0" FontSize="18" FontWeight="Bold" Foreground="White" Canvas.Right="0" Margin="0,10,20,0"/>
+                <Rectangle Name ="background1" Height="707" Width="540" Fill="Orange" Canvas.Bottom="0" />
+                <Rectangle Name ="background2" Height="707" Width="540" Fill="LightGreen" Canvas.Bottom="707" />
+                <Rectangle Name="Player" Height="50" Width="60" Fill="Yellow" Canvas.Left="246" Canvas.Top="518" />
+                <Label Name="ScoreText" Content="Score: 0" FontSize="18" FontWeight="Bold" Foreground="White" Canvas.Left="0" Margin="20,10,0,0" />
+                <Label Name="Damage" Content="Damage: 0" FontSize="18" FontWeight="Bold" Foreground="White" Canvas.Right="0" Margin="0,10,20,0" />
             </Canvas>
-        
-    </Viewbox>
+        </Viewbox>
         <Grid x:Name="GameOverMenu"
               Background="#CC000000"
               Grid.RowSpan="2"
