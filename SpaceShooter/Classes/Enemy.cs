@@ -2,7 +2,7 @@
 
 namespace SpaceShooter.Classes
 {
-    internal class Enemy : UnindentifiedFlyingObject
+    internal class Enemy : GameObject
     {
         public Enemy(int speed, bool homing = false, bool shooting = false, bool evasion = false)
         {

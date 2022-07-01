@@ -2,7 +2,7 @@
 
 namespace SpaceShooter.Classes
 {
-    internal abstract class UnindentifiedFlyingObject
+    internal abstract class GameObject
     {
         public bool EvadesLeft { get; set; }
         public Guid Guid { get; set; }

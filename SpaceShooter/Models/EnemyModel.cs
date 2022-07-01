@@ -8,7 +8,7 @@ namespace SpaceShooter.Models
 {
     internal class EnemyModel : GameModel
     {
-        public EnemyModel(UnindentifiedFlyingObject uObj)
+        public EnemyModel(GameObject uObj)
         {
             uIElement = new Rectangle()
             {

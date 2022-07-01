@@ -43,7 +43,7 @@ namespace SpaceShooter
             To = 0.1
         };
 
-        private readonly PlayerModel Player;
+        private readonly PlayerModel _player;
         private readonly Random rnd = new();
         private readonly Stopwatch stw = new();
         private Rect playerHitBox;
@@ -54,9 +54,9 @@ namespace SpaceShooter
             _gameControls = new();
             _gameState = new();
             _garbageCollector = new();
-            Player = new PlayerModel();
+            _player = new PlayerModel();
 
-            SetUpGame();
+            _ = SetUpGame();
 
             _gameState.TriggerSpawnModel += OnUfoSpawn;
             _gameState.TriggerSpawnAsteroidModel += OnAsteroidSpawn;
@@ -75,7 +75,7 @@ namespace SpaceShooter
 
         private void ClearGameCanvas()
         {
-            foreach (Rectangle item in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet" || (string)rect.Tag == "Enemy" || (string)rect.Tag == "Nano").ToList())
+            foreach (Rectangle item in GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Bullet" || (string)rect.Tag == "Enemy" || (string)rect.Tag == "Nano" || (string)rect.Tag == "Player").ToList())
             {
                 GameCanvas.Children.Remove(item);
             }
@@ -127,7 +127,7 @@ namespace SpaceShooter
             }
         }
 
-        private void EnemyShoots(UnindentifiedFlyingObject uObj)
+        private void EnemyShoots(GameObject uObj)
         {
             stw.Start();
             if (stw.ElapsedMilliseconds % 20 == 0)
@@ -271,7 +271,7 @@ namespace SpaceShooter
 
                     if (playerHitBox.IntersectsWith(enemyHitBox))
                     {
-                        Player.GetShape().Fill = shieldSprite;
+                        _player.GetShape().Fill = shieldSprite;
                         _gameState.Damage++;
                     }
                     else if (Canvas.GetTop(item) > 650)
@@ -287,7 +287,7 @@ namespace SpaceShooter
 
                     if (playerHitBox.IntersectsWith(enemyHitBox))
                     {
-                        Player.GetShape().Fill = shieldSprite;
+                        _player.GetShape().Fill = shieldSprite;
                         _gameState.Damage += 10;
                         _garbageCollector.Add(item);
                     }
@@ -346,27 +346,27 @@ namespace SpaceShooter
 
         private void MovePlayer()
         {
-            if (_gameControls.MoveLeft && Canvas.GetLeft(Player.GetUIElement()) > Player.GetShape().Width / 2)
+            if (_gameControls.MoveLeft && Canvas.GetLeft(_player.GetUIElement()) > _player.GetShape().Width / 2)
             {
-                Canvas.SetLeft(Player.GetUIElement(), Canvas.GetLeft(Player.GetUIElement()) - GameState.PlayerSpeed);
+                Canvas.SetLeft(_player.GetUIElement(), Canvas.GetLeft(_player.GetUIElement()) - GameState.PlayerSpeed);
             }
-            if (_gameControls.MoveRight && Canvas.GetLeft(Player.GetUIElement()) + Player.GetShape().Width < GameCanvas.Width - (Player.GetShape().Width / 2))
+            if (_gameControls.MoveRight && Canvas.GetLeft(_player.GetUIElement()) + _player.GetShape().Width < GameCanvas.Width - (_player.GetShape().Width / 2))
             {
-                Canvas.SetLeft(Player.GetUIElement(), Canvas.GetLeft(Player.GetUIElement()) + GameState.PlayerSpeed);
+                Canvas.SetLeft(_player.GetUIElement(), Canvas.GetLeft(_player.GetUIElement()) + GameState.PlayerSpeed);
             }
-            if (_gameControls.MoveUp && Canvas.GetTop(Player.GetUIElement()) > Player.GetShape().Height * 4)
+            if (_gameControls.MoveUp && Canvas.GetTop(_player.GetUIElement()) > _player.GetShape().Height * 4)
             {
-                Canvas.SetTop(Player.GetUIElement(), Canvas.GetTop(Player.GetUIElement()) - (GameState.PlayerSpeed / 2));
+                Canvas.SetTop(_player.GetUIElement(), Canvas.GetTop(_player.GetUIElement()) - (GameState.PlayerSpeed / 2));
             }
-            if (_gameControls.MoveDown && Canvas.GetTop(Player.GetUIElement()) + Player.GetShape().Height < GameCanvas.Height - (Player.GetShape().Height / 2))
+            if (_gameControls.MoveDown && Canvas.GetTop(_player.GetUIElement()) + _player.GetShape().Height < GameCanvas.Height - (_player.GetShape().Height / 2))
             {
-                Canvas.SetTop(Player.GetUIElement(), Canvas.GetTop(Player.GetUIElement()) + (GameState.PlayerSpeed / 2));
+                Canvas.SetTop(_player.GetUIElement(), Canvas.GetTop(_player.GetUIElement()) + (GameState.PlayerSpeed / 2));
             }
         }
 
         private void MoveUfos()
         {
-            foreach (UnindentifiedFlyingObject enemyObj in _gameState.Ufos)
+            foreach (GameObject enemyObj in _gameState.Ufos)
             {
                 Rectangle enemyRect = GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == $"{enemyObj.GetType().Name}").FirstOrDefault(rect => enemyObj.Guid.ToString() == rect.Uid)!;
                 if (enemyRect is not null)
@@ -392,11 +392,11 @@ namespace SpaceShooter
             {
                 ImageSource = new BitmapImage(new Uri("Assets/boom.png", UriKind.Relative))
             };
-            Player.GetShape().Fill = _boomSprite;
+            _player.GetShape().Fill = _boomSprite;
             Damage.Content = $"Damage: {_gameState.Damage}";
             Damage.Foreground = Brushes.Red;
             await Task.Delay(200);
-            Player.GetShape().Fill = new ImageBrush(new BitmapImage(new Uri("Assets/skull.png", UriKind.Relative)));
+            _player.GetShape().Fill = new ImageBrush(new BitmapImage(new Uri("Assets/skull.png", UriKind.Relative)));
             await Task.Delay(300);
             await TransitionToEndScreen();
             FinalScoreText.Text = $"Score: {_gameState.Score}";
@@ -405,7 +405,7 @@ namespace SpaceShooter
         private async void OnGameRestarted()
         {
             await TransitionToGameScreen();
-            SetUpGame();
+            await SetUpGame();
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)
@@ -456,7 +456,7 @@ namespace SpaceShooter
             }
         }
 
-        private void OnUfoSpawn(UnindentifiedFlyingObject uObj)
+        private void OnUfoSpawn(GameObject uObj)
         {
             SpawnModel(uObj);
         }
@@ -471,7 +471,7 @@ namespace SpaceShooter
             Close();
         }
 
-        private async void SetUpGame()
+        private async Task SetUpGame()
         {
             ClearGameCanvas();
             SetUpStarfield();
@@ -486,17 +486,17 @@ namespace SpaceShooter
 
         private void SetUpPlayerShip()
         {
-            Player.GetShape().Fill = new ImageBrush(new BitmapImage(new Uri("Assets/player.png", UriKind.Relative)));
-
-            Canvas.SetLeft(Player.GetUIElement(), 246);
-            Canvas.SetTop(Player.GetUIElement(), 518);
-            GameCanvas.Children.Add(Player.GetUIElement());
+            _player.GetShape().Fill = new ImageBrush(new BitmapImage(new Uri("Assets/player.png", UriKind.Relative)));
+            GameCanvas.Children.Add(_player.GetUIElement());
+            Canvas.SetLeft(_player.GetUIElement(), 246);
+            Canvas.SetTop(_player.GetUIElement(), 518);
         }
 
         private void SetUpStarfield()
         {
-            background1.Fill = new ImageBrush(new BitmapImage(new Uri("Assets/StarField.jpg", UriKind.Relative)));
-            background2.Fill = new ImageBrush(new BitmapImage(new Uri("Assets/StarField.jpg", UriKind.Relative)));
+            ImageBrush background = new ImageBrush(new BitmapImage(new Uri("Assets/StarField.jpg", UriKind.Relative)));
+            background1.Fill = background;
+            background2.Fill = background;
             Canvas.SetBottom(background1, 0);
             Canvas.SetBottom(background2, 707);
         }
@@ -513,12 +513,12 @@ namespace SpaceShooter
         private void SpawnBullet()
         {
             BulletModel newBullet = new();
-            Canvas.SetLeft(newBullet.GetUIElement(), Canvas.GetLeft(Player.GetUIElement()) + (Player.GetShape().Width / 2));
-            Canvas.SetTop(newBullet.GetUIElement(), Canvas.GetTop(Player.GetUIElement()) - newBullet.GetShape().Height);
+            Canvas.SetLeft(newBullet.GetUIElement(), Canvas.GetLeft(_player.GetUIElement()) + (_player.GetShape().Width / 2));
+            Canvas.SetTop(newBullet.GetUIElement(), Canvas.GetTop(_player.GetUIElement()) - newBullet.GetShape().Height);
             GameCanvas.Children.Add(newBullet.GetUIElement());
         }
 
-        private void SpawnBullet(UnindentifiedFlyingObject uObj)
+        private void SpawnBullet(GameObject uObj)
         {
             Rectangle shooter = GameCanvas.Children.OfType<Rectangle>().Where(rect => (string)rect.Tag == "Enemy").First(r => r.Uid == uObj.Guid.ToString());
             BulletModel newBullet = new(uObj);
@@ -527,7 +527,7 @@ namespace SpaceShooter
             GameCanvas.Children.Add(newBullet.GetUIElement());
         }
 
-        private void SpawnModel(UnindentifiedFlyingObject uObj)
+        private void SpawnModel(GameObject uObj)
         {
             GameModel uRect;
             if (uObj.GetType() == typeof(Enemy))
@@ -556,15 +556,15 @@ namespace SpaceShooter
             await FadeIn(GameCanvas);
         }
 
-        private void UfoIsAShooter(UnindentifiedFlyingObject uObj, Rectangle uRect)
+        private void UfoIsAShooter(GameObject uObj, Rectangle uRect)
         {
-            if (Canvas.GetTop(uRect) > Canvas.GetTop(Player.GetUIElement()) - GameCanvas.Height && Canvas.GetTop(uRect) < Canvas.GetTop(Player.GetUIElement()) && uObj.Shooting && !uObj.TakesEvasiveManeuver)
+            if (Canvas.GetTop(uRect) > Canvas.GetTop(_player.GetUIElement()) - GameCanvas.Height && Canvas.GetTop(uRect) < Canvas.GetTop(_player.GetUIElement()) && uObj.Shooting && !uObj.TakesEvasiveManeuver)
             {
-                if (Canvas.GetLeft(uRect) < Canvas.GetLeft(Player.GetUIElement()))
+                if (Canvas.GetLeft(uRect) < Canvas.GetLeft(_player.GetUIElement()))
                 {
                     Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + uObj!.Speed);
                 }
-                else if (Canvas.GetLeft(uRect) > Canvas.GetLeft(Player.GetUIElement()) + (Player.GetShape().Width / 4))
+                else if (Canvas.GetLeft(uRect) > Canvas.GetLeft(_player.GetUIElement()) + (_player.GetShape().Width / 4))
                 {
                     Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) - uObj!.Speed);
                 }
@@ -575,15 +575,15 @@ namespace SpaceShooter
             }
         }
 
-        private void UfoIsTrackingPlayer(UnindentifiedFlyingObject uObj, Rectangle uRect)
+        private void UfoIsTrackingPlayer(GameObject uObj, Rectangle uRect)
         {
-            if (Canvas.GetTop(uRect) > Canvas.GetTop(Player.GetUIElement()) - 150 && Canvas.GetTop(uRect) < Canvas.GetTop(Player.GetUIElement()) && uObj.Tracking && !uObj.Shooting && !uObj.TakesEvasiveManeuver)
+            if (Canvas.GetTop(uRect) > Canvas.GetTop(_player.GetUIElement()) - 150 && Canvas.GetTop(uRect) < Canvas.GetTop(_player.GetUIElement()) && uObj.Tracking && !uObj.Shooting && !uObj.TakesEvasiveManeuver)
             {
-                if (Canvas.GetLeft(uRect) < Canvas.GetLeft(Player.GetUIElement()))
+                if (Canvas.GetLeft(uRect) < Canvas.GetLeft(_player.GetUIElement()))
                 {
                     Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) + uObj!.Speed);
                 }
-                else if (Canvas.GetLeft(uRect) > Canvas.GetLeft(Player.GetUIElement()) + (Player.GetShape().Width / 4))
+                else if (Canvas.GetLeft(uRect) > Canvas.GetLeft(_player.GetUIElement()) + (_player.GetShape().Width / 4))
                 {
                     Canvas.SetLeft(uRect, Canvas.GetLeft(uRect) - uObj!.Speed);
                 }
@@ -613,8 +613,8 @@ namespace SpaceShooter
 
         private void UpdatePlayerModel()
         {
-            playerHitBox = new Rect(Canvas.GetLeft(Player.GetUIElement()), Canvas.GetTop(Player.GetUIElement()), Player.GetShape().Width, Player.GetShape().Height);
-            Player.GetShape().Fill = new ImageBrush(new BitmapImage(new Uri("Assets/player.png", UriKind.Relative)));
+            playerHitBox = new Rect(Canvas.GetLeft(_player.GetUIElement()), Canvas.GetTop(_player.GetUIElement()), _player.GetShape().Width, _player.GetShape().Height);
+            _player.GetShape().Fill = new ImageBrush(new BitmapImage(new Uri("Assets/player.png", UriKind.Relative)));
         }
 
         private void UpdateScore()

@@ -2,7 +2,7 @@
 
 namespace SpaceShooter.Classes
 {
-    internal class Nano : UnindentifiedFlyingObject
+    internal class Nano : GameObject
     {
         public Nano(int speed)
         {

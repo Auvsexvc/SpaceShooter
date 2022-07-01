@@ -18,7 +18,7 @@ namespace SpaceShooter.Models
             };
         }
 
-        public BulletModel(UnindentifiedFlyingObject uObj)
+        public BulletModel(GameObject uObj)
         {
             uIElement = new Rectangle()
             {

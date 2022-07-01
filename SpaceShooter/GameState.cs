@@ -45,7 +45,7 @@ namespace SpaceShooter
 
         public event Action? TriggerSpawnAsteroidModel;
 
-        public event Action<UnindentifiedFlyingObject>? TriggerSpawnModel;
+        public event Action<GameObject>? TriggerSpawnModel;
 
         public static int BulletSpeed { get => BulletInitSpeed; }
         public static int EnemyBulletSpeed { get => EnemyBulletInitSpeed; }
@@ -58,7 +58,7 @@ namespace SpaceShooter
         public int Level { get => level; }
         public int NanoSpeed { get => nanoSpeed; }
         public int Score { get; set; }
-        public List<UnindentifiedFlyingObject> Ufos { get; } = new();
+        public List<GameObject> Ufos { get; } = new();
 
         public void CountDownToAsteroidSpawn()
         {

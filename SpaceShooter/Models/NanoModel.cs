@@ -8,7 +8,7 @@ namespace SpaceShooter.Models
 {
     internal class NanoModel : GameModel
     {
-        public NanoModel(UnindentifiedFlyingObject uObj)
+        public NanoModel(GameObject uObj)
         {
             uIElement = new Rectangle()
             {
