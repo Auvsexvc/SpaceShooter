@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SpaceShooter.Classes;
+using System;
 using System.Collections.Generic;
 
 namespace SpaceShooter

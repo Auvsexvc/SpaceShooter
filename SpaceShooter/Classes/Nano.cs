@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SpaceShooter
+namespace SpaceShooter.Classes
 {
     internal class Nano : UnindentifiedFlyingObject
     {
