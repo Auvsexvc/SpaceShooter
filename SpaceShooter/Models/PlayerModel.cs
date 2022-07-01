@@ -12,12 +12,13 @@ namespace SpaceShooter.Models
 {
     internal class PlayerModel : GameModel
     {
-        public PlayerModel()
+        public PlayerModel(GameObject uObj)
         {
             uIElement = new Rectangle()
             {
                 Name = "Player",
                 Tag = "Player",
+                Uid = uObj.Guid.ToString(),
                 Height = 50,
                 Width = 60,
                 Fill = new ImageBrush(new BitmapImage(new Uri("Assets/player.png", UriKind.Relative))),

@@ -10,6 +10,7 @@ namespace SpaceShooter.Models
     {
         public EnemyModel(GameObject uObj)
         {
+            Random rnd = new Random();
             uIElement = new Rectangle()
             {
                 Tag = $"{uObj.GetType().Name}",

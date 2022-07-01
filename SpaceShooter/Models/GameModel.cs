@@ -7,13 +7,11 @@ namespace SpaceShooter.Models
 {
     internal abstract class GameModel
     {
-        protected readonly Random rnd;
         protected readonly ImageBrush sprite;
         protected UIElement uIElement;
 
         protected GameModel()
         {
-            rnd = new Random();
             sprite = new ImageBrush();
             uIElement = new UIElement();
         }
